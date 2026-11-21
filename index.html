@@ -925,6 +925,32 @@ tr:hover td {
     break-inside: avoid;
   }
 }
+
+/* Convenience controls: searchable member ID and tap-to-pin household map */
+.member-picker { position: relative; width: 100%; }
+.member-picker-control { display: flex; gap: 7px; align-items: stretch; }
+.member-picker-control input { min-width: 0; flex: 1; }
+.member-picker-clear { flex: 0 0 42px; border: 1px solid var(--line, #d8e1e8); border-radius: 9px; background: #f7fafc; color: #526779; }
+.member-picker-results { position: relative; margin-top: 5px; max-height: 220px; overflow-y: auto; background: #fff; border: 1px solid #ccd8e1; border-radius: 10px; box-shadow: 0 8px 20px rgba(19,50,72,.12); }
+.member-picker-results[hidden] { display: none !important; }
+.member-picker-option { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; padding: 11px 13px; border: 0; border-bottom: 1px solid #edf1f4; background: #fff; color: #20384b; cursor: pointer; }
+.member-picker-option:last-child { border-bottom: 0; }
+.member-picker-option:hover, .member-picker-option:focus { background: #edf6fb; outline: none; }
+.member-picker-option strong { display: block; font-size: .94rem; }
+.member-picker-option small { display: block; color: #6b7f8e; margin-top: 3px; }
+.member-picker-empty { padding: 12px 13px; color: #647789; font-size: .9rem; }
+.map-picker { width: 100%; }
+.map-picker-actions { display: flex; flex-wrap: wrap; gap: 8px; margin: 5px 0 9px; }
+.map-picker-actions .btn { min-height: 40px; }
+.map-picker-map { width: 100%; height: 245px; border: 1px solid #d5e0e7; border-radius: 11px; overflow: hidden; background: #edf2f5; z-index: 1; }
+.map-picker-meta { display: block; margin-top: 7px; color: #657b8c; font-size: .82rem; line-height: 1.45; }
+.map-picker-hint { margin-top: 3px; color: #708393; font-size: .82rem; }
+.leaflet-container { font-family: inherit; }
+@media (max-width: 600px) {
+  .map-picker-map { height: 220px; }
+  .member-picker-option { padding: 13px 12px; }
+}
+
 </style>
 </head>
 <body>
@@ -1003,7 +1029,7 @@ tr:hover td {
 // ===================================================================================
 // 01. CONFIGURATION AND APPLICATION STATE
 // ===================================================================================
-const API_URL = 'https://patient-breeze-12ed.sisosoawooaoo.workers.dev/api';
+const API_URL = 'PASTE_YOUR_CLOUDFLARE_WORKER_API_URL_HERE';
 const APP_NAME = 'ระบบแผนผังครอบครัวและฐานข้อมูลสุขภาพชุมชน';
 const ROLE_LABEL = { ADMIN: 'ผู้ดูแลระบบ', OFFICER: 'เจ้าหน้าที่ รพ.สต.', VOLUNTEER: 'อาสาสมัครสาธารณสุขประจำหมู่บ้าน' };
 const STATUS_LABEL = { PENDING: 'รอตรวจสอบ', APPROVED: 'อนุมัติแล้ว', REJECTED: 'ไม่อนุมัติ', RETURNED: 'ส่งกลับแก้ไข', ACTIVE: 'ใช้งาน', ARCHIVED: 'เก็บถาวร' };
@@ -1137,6 +1163,191 @@ const FIELD_OPTIONS = {
     smoking_status: [{ value: 'NEVER', label: 'ไม่สูบ' }, { value: 'CURRENT', label: 'สูบ' }, { value: 'FORMER', label: 'เคยสูบ' }],
     alcohol_status: [{ value: 'NEVER', label: 'ไม่ดื่ม' }, { value: 'CURRENT', label: 'ดื่ม' }, { value: 'FORMER', label: 'เคยดื่ม' }]
 };
+
+// Member autocomplete: search by member ID, first name, surname or nickname.
+// The backend limits volunteer results to their assigned households.
+function initMemberPickers(root = document) {
+    root.querySelectorAll('[data-member-picker]').forEach(box => {
+        if (box.dataset.initialized === '1') return;
+        box.dataset.initialized = '1';
+        const input = box.querySelector('[data-member-search]');
+        const hidden = box.querySelector('[data-member-value]');
+        const results = box.querySelector('[data-member-results]');
+        const clearButton = box.querySelector('[data-member-clear]');
+        if (!input || !hidden || !results) return;
+        let debounceTimer = null;
+        let requestSerial = 0;
+        let currentItems = [];
+
+        const closeResults = () => { results.hidden = true; results.innerHTML = ''; };
+        const renderResults = (items) => {
+            currentItems = items || [];
+            if (!currentItems.length) {
+                results.innerHTML = '<div class="member-picker-empty">ไม่พบสมาชิกในขอบเขตพื้นที่ที่คุณได้รับมอบหมาย</div>';
+                results.hidden = false;
+                return;
+            }
+            results.innerHTML = currentItems.map((m, index) => {
+                const fullName = `${m.title || ''}${m.first_name || ''} ${m.last_name || ''}`.trim() || m.nickname || 'ไม่ระบุชื่อ';
+                const home = [m.house_number ? `บ้าน ${m.house_number}` : '', m.moo ? `หมู่ ${m.moo}` : ''].filter(Boolean).join(' · ');
+                return `<button type="button" class="member-picker-option" data-member-option="${index}"><span><strong>${esc(fullName)}</strong><small>รหัส ${esc(m.member_id || '-')} ${home ? ' · ' + esc(home) : ''}</small></span><i class="fa-solid fa-arrow-turn-down"></i></button>`;
+            }).join('');
+            results.hidden = false;
+        };
+
+        input.addEventListener('input', () => {
+            if (hidden.value) {
+                hidden.value = '';
+                const householdInput = box.closest('form')?.querySelector('[name="household_id"]');
+                if (householdInput && householdInput.dataset.memberAutofilled === '1') {
+                    householdInput.value = '';
+                    householdInput.dataset.memberAutofilled = '0';
+                }
+            }
+            const query = input.value.trim();
+            window.clearTimeout(debounceTimer);
+            if (query.length < 2) {
+                results.innerHTML = '<div class="member-picker-empty">พิมพ์อย่างน้อย 2 ตัวอักษรเพื่อค้นหา</div>';
+                results.hidden = false;
+                return;
+            }
+            results.innerHTML = '<div class="member-picker-empty"><i class="fa-solid fa-spinner fa-spin"></i> กำลังค้นหารายชื่อ…</div>';
+            results.hidden = false;
+            const serial = ++requestSerial;
+            debounceTimer = window.setTimeout(async () => {
+                try {
+                    const response = await api('members.lookup', { query, limit: 10 });
+                    if (serial !== requestSerial) return;
+                    renderResults(response.items || []);
+                } catch (error) {
+                    if (serial !== requestSerial) return;
+                    results.innerHTML = `<div class="member-picker-empty">ค้นหาไม่สำเร็จ: ${esc(error.message || 'กรุณาลองใหม่')}</div>`;
+                    results.hidden = false;
+                }
+            }, 260);
+        });
+
+        results.addEventListener('click', event => {
+            const option = event.target.closest('[data-member-option]');
+            if (!option) return;
+            const member = currentItems[Number(option.dataset.memberOption)];
+            if (!member) return;
+            hidden.value = member.member_id || '';
+            const fullName = `${member.title || ''}${member.first_name || ''} ${member.last_name || ''}`.trim();
+            input.value = `${fullName || member.nickname || 'สมาชิก'} · ${member.member_id}`;
+            box.dataset.selected = '1';
+            const householdInput = box.closest('form')?.querySelector('[name="household_id"]');
+            if (householdInput && member.household_id && box.dataset.fieldName === 'member_id') {
+                householdInput.value = member.household_id;
+                householdInput.dataset.memberAutofilled = '1';
+            }
+            closeResults();
+        });
+
+        if (clearButton) clearButton.addEventListener('click', () => {
+            hidden.value = '';
+            input.value = '';
+            box.dataset.selected = '0';
+            const householdInput = box.closest('form')?.querySelector('[name="household_id"]');
+            if (householdInput && householdInput.dataset.memberAutofilled === '1') {
+                householdInput.value = '';
+                householdInput.dataset.memberAutofilled = '0';
+            }
+            input.focus();
+            closeResults();
+        });
+
+        input.addEventListener('focus', () => {
+            if (input.value.trim().length >= 2 && !hidden.value) input.dispatchEvent(new Event('input'));
+        });
+        input.addEventListener('blur', () => window.setTimeout(() => {
+            if (!box.contains(document.activeElement)) closeResults();
+        }, 180));
+    });
+}
+
+// Map coordinate picker: the form stores latitude/longitude in hidden fields;
+// staff and volunteers choose the point by tapping or dragging a marker on the map.
+function initMapPickers(root = document) {
+    if (!window.L) return;
+    root.querySelectorAll('[data-map-picker]').forEach(box => {
+        if (box.dataset.initialized === '1') return;
+        box.dataset.initialized = '1';
+        const mapElement = box.querySelector('[data-map-canvas]');
+        const latInput = box.querySelector('[data-map-lat]');
+        const lngInput = box.querySelector('[data-map-lng]');
+        const coordinateLabel = box.querySelector('[data-map-coordinates]');
+        if (!mapElement || !latInput || !lngInput) return;
+
+        const defaultCenter = [17.15, 99.86];
+        const initialLat = Number(latInput.value);
+        const initialLng = Number(lngInput.value);
+        const hasInitial = latInput.value !== '' && lngInput.value !== '' && Number.isFinite(initialLat) && Number.isFinite(initialLng);
+        const map = L.map(mapElement, { scrollWheelZoom: false }).setView(hasInitial ? [initialLat, initialLng] : defaultCenter, hasInitial ? 17 : 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        let marker = null;
+
+        const updatePoint = (latlng, zoom = 17) => {
+            const lat = Number(latlng.lat);
+            const lng = Number(latlng.lng);
+            if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+            latInput.value = lat.toFixed(7);
+            lngInput.value = lng.toFixed(7);
+            if (!marker) {
+                marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+                marker.on('dragend', () => updatePoint(marker.getLatLng(), 17));
+            } else {
+                marker.setLatLng([lat, lng]);
+            }
+            if (coordinateLabel) coordinateLabel.textContent = `เลือกตำแหน่งแล้ว · ${lat.toFixed(6)}, ${lng.toFixed(6)} (ลากหมุดเพื่อปรับตำแหน่งได้)`;
+            map.setView([lat, lng], Math.max(map.getZoom(), zoom));
+        };
+
+        map.on('click', event => updatePoint(event.latlng, 17));
+        if (hasInitial) {
+            marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
+            marker.on('dragend', () => updatePoint(marker.getLatLng(), 17));
+            if (coordinateLabel) coordinateLabel.textContent = `ตำแหน่งที่บันทึกไว้ · ${initialLat.toFixed(6)}, ${initialLng.toFixed(6)}`;
+        } else if (coordinateLabel) {
+            coordinateLabel.textContent = 'แตะบนแผนที่เพื่อปักหมุดบ้าน หรือใช้ปุ่มตำแหน่งปัจจุบัน';
+        }
+
+        const currentButton = box.querySelector('[data-map-current]');
+        if (currentButton) currentButton.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                if (coordinateLabel) coordinateLabel.textContent = 'อุปกรณ์นี้ไม่รองรับการระบุตำแหน่ง กรุณาแตะเลือกบนแผนที่';
+                return;
+            }
+            currentButton.disabled = true;
+            currentButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังหาตำแหน่ง…';
+            navigator.geolocation.getCurrentPosition(position => {
+                updatePoint({ lat: position.coords.latitude, lng: position.coords.longitude }, 17);
+                currentButton.disabled = false;
+                currentButton.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> ใช้ตำแหน่งปัจจุบัน';
+            }, error => {
+                currentButton.disabled = false;
+                currentButton.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> ใช้ตำแหน่งปัจจุบัน';
+                if (coordinateLabel) coordinateLabel.textContent = error.code === 1
+                    ? 'ไม่ได้รับอนุญาตให้ใช้ตำแหน่ง กรุณาแตะเลือกบนแผนที่'
+                    : 'หาตำแหน่งปัจจุบันไม่สำเร็จ กรุณาแตะเลือกบนแผนที่';
+            }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 60000 });
+        });
+
+        const clearButton = box.querySelector('[data-map-clear]');
+        if (clearButton) clearButton.addEventListener('click', () => {
+            latInput.value = '';
+            lngInput.value = '';
+            if (marker) { map.removeLayer(marker); marker = null; }
+            if (coordinateLabel) coordinateLabel.textContent = 'ยังไม่ได้เลือกตำแหน่ง';
+            map.setView(defaultCenter, 13);
+        });
+        window.setTimeout(() => map.invalidateSize(), 280);
+    });
+}
+
 function renderField(field, index) {
     const name = field.name;
     const id = 'f_' + name + '_' + index;
@@ -1144,7 +1355,35 @@ function renderField(field, index) {
     const value = field.value === undefined || field.value === null ? '' : field.value;
     const help = field.help ? `<small class="muted">${esc(field.help)}</small>` : '';
     let control = '';
-    if (field.type === 'textarea') {
+
+    if (field.type === 'map-picker') {
+        const mapId = 'map_' + index + '_' + Math.random().toString(36).slice(2, 7);
+        const mapValue = field.value && typeof field.value === 'object' ? field.value : {};
+        control = `<div class="map-picker" data-map-picker>
+          <div class="map-picker-actions">
+            <button type="button" class="btn btn-outline" data-map-current><i class="fa-solid fa-location-crosshairs"></i> ใช้ตำแหน่งปัจจุบัน</button>
+            <button type="button" class="btn btn-soft" data-map-clear><i class="fa-solid fa-eraser"></i> ล้างตำแหน่ง</button>
+          </div>
+          <div class="map-picker-map" id="${mapId}" data-map-canvas></div>
+          <span class="map-picker-meta" data-map-coordinates">แตะบนแผนที่เพื่อเลือกตำแหน่ง</span>
+          <span class="map-picker-hint">แตะตำแหน่งบ้านบนแผนที่ หรือกดใช้ GPS แล้วลากหมุดเพื่อปรับให้ตรงจุด</span>
+          <input type="hidden" name="latitude" data-map-lat value="${esc(mapValue.latitude || '')}">
+          <input type="hidden" name="longitude" data-map-lng value="${esc(mapValue.longitude || '')}">
+        </div>`;
+    }
+    else if ((field.type === 'member-picker' || (/_member_id$/.test(name) || name === 'member_id') && field.type !== 'select')) {
+        const display = field.displayValue || (value ? `รหัสสมาชิกเดิม: ${value}` : '');
+        control = `<div class="member-picker" data-member-picker data-field-name="${esc(name)}">
+          <div class="member-picker-control">
+            <input id="${id}_search" type="search" class="form-control" data-member-search autocomplete="off" value="${esc(display)}" placeholder="พิมพ์ชื่อ นามสกุล หรือรหัสสมาชิกเพื่อค้นหา">
+            <button type="button" class="member-picker-clear" data-member-clear aria-label="ล้างสมาชิกที่เลือก"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <input id="${id}" type="hidden" name="${esc(name)}" data-member-value value="${esc(value)}">
+          <div class="member-picker-results" data-member-results hidden></div>
+          <small class="muted">พิมพ์อย่างน้อย 2 ตัวอักษร แล้วแตะเลือกรายชื่อที่ตรงกัน</small>
+        </div>`;
+    }
+    else if (field.type === 'textarea') {
         control = `<textarea id="${id}" name="${esc(name)}" class="form-control" ${required} placeholder="${esc(field.placeholder || '')}">${esc(value)}</textarea>`;
     }
     else if (field.type === 'select') {
@@ -1163,7 +1402,7 @@ function renderField(field, index) {
     else {
         control = `<input id="${id}" name="${esc(name)}" type="${esc(field.type || 'text')}" class="form-control" value="${esc(value)}" ${required} placeholder="${esc(field.placeholder || '')}" ${field.min !== undefined ? `min="${field.min}"` : ''} ${field.step ? `step="${field.step}"` : ''} ${field.maxLength ? `maxlength="${field.maxLength}"` : ''}>`;
     }
-    return `<div class="form-field" style="${field.full ? 'grid-column:1/-1' : ''}"><label for="${id}">${esc(field.label)}${field.required ? ' *' : ''}</label>${control}${help}</div>`;
+    return `<div class="form-field" style="${field.full || field.type === 'map-picker' ? 'grid-column:1/-1' : ''}"><label for="${field.type === 'map-picker' ? '' : id}">${esc(field.label)}${field.required ? ' *' : ''}</label>${control}${help}</div>`;
 }
 async function showForm(title, fields, onSubmit, options = {}) {
     const html = `<form id="dynamicForm" class="swal-form"><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 13px">${fields.map(renderField).join('')}</div>${options.note ? `<div class="notice" style="margin-top:8px">${options.note}</div>` : ''}</form>`;
@@ -1171,8 +1410,21 @@ async function showForm(title, fields, onSubmit, options = {}) {
             const form = $('#dynamicForm');
             if (!form.reportValidity())
                 return false;
+            const requiredMember = fields.find(field => field.required && /(^member_id$|_member_id$)/.test(field.name) && field.type !== 'select');
+            if (requiredMember) {
+                const selectedMember = form.querySelector(`[name="${CSS.escape(requiredMember.name)}"]`);
+                if (!selectedMember || !selectedMember.value) {
+                    Swal.showValidationMessage('กรุณาพิมพ์ค้นหาและแตะเลือกรายชื่อสมาชิกก่อนบันทึก');
+                    return false;
+                }
+            }
             const values = {};
             fields.forEach((field, index) => {
+                if (field.type === 'map-picker') {
+                    values.latitude = form.querySelector('[name="latitude"]')?.value || '';
+                    values.longitude = form.querySelector('[name="longitude"]')?.value || '';
+                    return;
+                }
                 const element = form.querySelector(`[name="${CSS.escape(field.name)}"]`);
                 if (!element)
                     return;
@@ -1184,6 +1436,9 @@ async function showForm(title, fields, onSubmit, options = {}) {
                     values[field.name] = element.value;
             });
             return values;
+        }, didOpen: () => {
+            const form = $('#dynamicForm');
+            if (form) { initMemberPickers(form); initMapPickers(form); }
         } });
     if (!result.isConfirmed)
         return;
@@ -1343,38 +1598,38 @@ function closeMobileNav() { $('#sidebar').classList.remove('open'); $('#mobileOv
 // 05. ROLE-BASED NAVIGATION AND VIEW ROUTER
 // ===================================================================================
 const STAFF_NAV = [
-    { section: 'ภาพรวม' },
+    { section: 'เริ่มต้นและค้นหาข้อมูล' },
     { id: 'overview', label: 'ภาพรวมชุมชน', icon: 'fa-chart-pie' },
-    { id: 'search', label: 'ค้นหาครอบครัว / บุคคล', icon: 'fa-magnifying-glass' },
-    { section: 'ทะเบียนครอบครัว' },
-    { id: 'households', label: 'ข้อมูลครัวเรือน', icon: 'fa-house' },
-    { id: 'members', label: 'ข้อมูลสมาชิก', icon: 'fa-users' },
+    { id: 'search', label: 'ค้นหาประชาชน / ครัวเรือน', icon: 'fa-magnifying-glass' },
+    { section: 'ทะเบียนครัวเรือนและสมาชิก' },
+    { id: 'households', label: 'ทะเบียนครัวเรือน', icon: 'fa-house' },
+    { id: 'members', label: 'ทะเบียนสมาชิก', icon: 'fa-users' },
     { id: 'genogram', label: 'แผนผังเครือญาติ', icon: 'fa-diagram-project' },
-    { section: 'ข้อมูลสุขภาพ' },
+    { id: 'map', label: 'แผนที่ครัวเรือน', icon: 'fa-map-location-dot' },
+    { section: 'บันทึกและติดตามสุขภาพ' },
     { id: 'screenings', label: 'คัดกรองสุขภาพ', icon: 'fa-heart-pulse' },
-    { id: 'chronic', label: 'โรคเรื้อรัง', icon: 'fa-notes-medical' },
     { id: 'risks', label: 'ประเมินความเสี่ยง', icon: 'fa-triangle-exclamation' },
+    { id: 'chronic', label: 'โรคเรื้อรัง', icon: 'fa-notes-medical' },
     { id: 'vaccinations', label: 'ประวัติวัคซีน', icon: 'fa-syringe' },
-    { id: 'visits', label: 'บันทึกเยี่ยมบ้าน', icon: 'fa-house-medical-circle-check' },
+    { id: 'visits', label: 'เยี่ยมบ้าน', icon: 'fa-house-medical-circle-check' },
     { id: 'appointments', label: 'นัดหมายติดตาม', icon: 'fa-calendar-check' },
-    { section: 'ติดตามและรายงาน' },
+    { section: 'ติดตามงานและรายงาน' },
     { id: 'approvals', label: 'ตรวจสอบข้อมูลจาก อสม.', icon: 'fa-clipboard-check' },
     { id: 'notifications', label: 'การแจ้งเตือน', icon: 'fa-bell' },
     { id: 'reports', label: 'รายงานและส่งออก', icon: 'fa-file-export' },
-    { id: 'map', label: 'แผนที่ครัวเรือน', icon: 'fa-map-location-dot' },
     { section: 'บัญชีผู้ใช้' },
     { id: 'profile', label: 'ข้อมูลบัญชี / รหัสผ่าน', icon: 'fa-user-gear' }
 ];
 const VOLUNTEER_NAV = [
-    { section: 'บันทึกข้อมูลใหม่' },
-    { id: 'submit-household', label: 'เพิ่มข้อมูลครัวเรือน', icon: 'fa-house-circle-plus' },
+    { section: 'บันทึกงานภาคสนาม' },
+    { id: 'submit-household', label: 'เพิ่มครัวเรือนใหม่', icon: 'fa-house-circle-plus' },
     { id: 'submit-member', label: 'เพิ่มสมาชิกครอบครัว', icon: 'fa-user-plus' },
-    { id: 'submit-screening', label: 'บันทึกคัดกรองสุขภาพ', icon: 'fa-heart-pulse' },
-    { id: 'submit-chronic', label: 'แจ้งข้อมูลโรคเรื้อรัง', icon: 'fa-notes-medical' },
-    { id: 'submit-risk', label: 'ประเมินความเสี่ยง', icon: 'fa-triangle-exclamation' },
-    { id: 'submit-vaccination', label: 'บันทึกวัคซีน', icon: 'fa-syringe' },
     { id: 'submit-visit', label: 'บันทึกเยี่ยมบ้าน', icon: 'fa-house-medical-circle-check' },
-    { section: 'ติดตามข้อมูลที่ส่ง' },
+    { id: 'submit-screening', label: 'คัดกรองสุขภาพ', icon: 'fa-heart-pulse' },
+    { id: 'submit-risk', label: 'ประเมินความเสี่ยง', icon: 'fa-triangle-exclamation' },
+    { id: 'submit-chronic', label: 'แจ้งโรคเรื้อรัง', icon: 'fa-notes-medical' },
+    { id: 'submit-vaccination', label: 'บันทึกวัคซีน', icon: 'fa-syringe' },
+    { section: 'ติดตามงานที่ส่งให้เจ้าหน้าที่' },
     { id: 'my-submissions', label: 'สถานะรายการที่ส่ง', icon: 'fa-list-check' },
     { id: 'notifications', label: 'การแจ้งเตือน', icon: 'fa-bell' },
     { section: 'บัญชีผู้ใช้' },
@@ -1510,7 +1765,10 @@ async function renderOverview() {
         ${panel('ทางลัดการทำงาน', `<div class="grid grid-2">
           <button class="btn btn-soft" data-view="search"><i class="fa-solid fa-magnifying-glass"></i> ค้นหาครอบครัว</button>
           <button class="btn btn-soft" data-view="households"><i class="fa-solid fa-house"></i> ทะเบียนครัวเรือน</button>
+          <button class="btn btn-soft" data-view="members"><i class="fa-solid fa-users"></i> ทะเบียนสมาชิก</button>
+          <button class="btn btn-soft" data-view="visits"><i class="fa-solid fa-house-medical"></i> บันทึกเยี่ยมบ้าน</button>
           <button class="btn btn-soft" data-view="approvals"><i class="fa-solid fa-clipboard-check"></i> ตรวจสอบข้อมูลใหม่</button>
+          <button class="btn btn-soft" data-view="map"><i class="fa-solid fa-map-location-dot"></i> แผนที่ครัวเรือน</button>
           <button class="btn btn-soft" data-view="reports"><i class="fa-solid fa-file-export"></i> ส่งออกรายงาน</button>
         </div><p class="muted small" style="margin:15px 0 0">ข้อมูลสรุป ณ ${dateText(stats.updatedAt)}</p>`)}
       </div>`;
@@ -1559,7 +1817,7 @@ async function showHouseholdForm(row = null) {
         { name: 'household_head_name', label: 'ชื่อหัวหน้าครอบครัว', value: row?.household_head_name },
         { name: 'household_status', label: 'สถานะครัวเรือน', type: 'select', value: row?.household_status || 'NORMAL' },
         { name: 'risk_level', label: 'ระดับความเสี่ยง', type: 'select', value: row?.risk_level || 'LOW' },
-        { name: 'latitude', label: 'ละติจูด', type: 'number', step: 'any', value: row?.latitude }, { name: 'longitude', label: 'ลองจิจูด', type: 'number', step: 'any', value: row?.longitude },
+        { name: 'map_location', label: 'ตำแหน่งครัวเรือนบนแผนที่', type: 'map-picker', full: true, value: { latitude: row?.latitude || '', longitude: row?.longitude || '' }, help: 'แตะบนแผนที่หรือใช้ตำแหน่ง GPS ระบบจะบันทึกพิกัดให้อัตโนมัติ' },
         { name: 'responsible_volunteer_id', label: 'รหัส อสม. ผู้รับผิดชอบ', value: row?.responsible_volunteer_id },
         { name: 'responsible_volunteer_name', label: 'ชื่อ อสม. ผู้รับผิดชอบ', value: row?.responsible_volunteer_name },
         { name: 'responsible_officer_id', label: 'รหัสเจ้าหน้าที่ผู้รับผิดชอบ', value: row?.responsible_officer_id },
@@ -1705,9 +1963,16 @@ async function showHealthForm(type, row = null, volunteer = false) {
     const cfg = HEALTH_CONFIG[type];
     const fields = cfg.fields.map(([name, label, kind, required]) => ({ name, label, type: kind === 'checkbox' ? 'checkbox' : kind === 'select' ? 'select' : kind === 'textarea' ? 'textarea' : kind || 'text', required, value: row?.[name] }));
     if (volunteer) {
-        fields[0].label = 'รหัสสมาชิกจากเจ้าหน้าที่';
+        fields[0].label = 'ค้นหาสมาชิก (พิมพ์ชื่อหรือรหัสสมาชิก)';
         fields[0].required = true;
-        fields.unshift({ name: 'household_id', label: 'รหัสครัวเรือน (กรณีทราบ)', value: '' });
+        const householdField = fields.find(field => field.name === 'household_id');
+        if (householdField) {
+            householdField.label = 'รหัสครัวเรือน';
+            householdField.required = false;
+            householdField.help = 'ระบบจะเติมให้อัตโนมัติเมื่อเลือกสมาชิก';
+        } else {
+            fields.splice(1, 0, { name: 'household_id', label: 'รหัสครัวเรือน', value: '', help: 'ระบบจะเติมให้อัตโนมัติเมื่อเลือกสมาชิก' });
+        }
     }
     await showForm(row ? 'แก้ไข' + cfg.title : 'เพิ่ม' + cfg.title, fields, async (values) => {
         if (volunteer) {
@@ -1882,7 +2147,7 @@ const VOLUNTEER_FORMS = {
             { name: 'house_number', label: 'บ้านเลขที่', required: true }, { name: 'moo', label: 'หมู่ที่', type: 'number', required: true }, { name: 'soi', label: 'ซอย' }, { name: 'road', label: 'ถนน' },
             { name: 'subdistrict', label: 'ตำบล', value: 'วัดเกาะ' }, { name: 'district', label: 'อำเภอ', value: 'ศรีสำโรง' }, { name: 'province', label: 'จังหวัด', value: 'สุโขทัย' }, { name: 'postal_code', label: 'รหัสไปรษณีย์' },
             { name: 'household_head_name', label: 'ชื่อหัวหน้าครอบครัว' }, { name: 'household_status', label: 'สถานะครัวเรือน', type: 'select', value: 'NORMAL' }, { name: 'risk_level', label: 'ระดับความเสี่ยง', type: 'select', value: 'LOW' },
-            { name: 'latitude', label: 'ละติจูด', type: 'number' }, { name: 'longitude', label: 'ลองจิจูด', type: 'number' }, { name: 'house_photo', label: 'ภาพถ่ายบ้าน', type: 'file', accept: 'image/*' },
+            { name: 'map_location', label: 'ตำแหน่งบ้านบนแผนที่', type: 'map-picker', full: true, value: { latitude: '', longitude: '' }, help: 'แตะตำแหน่งบ้านบนแผนที่ หรือใช้ตำแหน่ง GPS' }, { name: 'house_photo', label: 'ภาพถ่ายบ้าน', type: 'file', accept: 'image/*' },
             { name: 'notes', label: 'หมายเหตุ', type: 'textarea', full: true }
         ] },
     FAMILY_MEMBERS: { title: 'เพิ่มสมาชิกครอบครัว', fields: [
