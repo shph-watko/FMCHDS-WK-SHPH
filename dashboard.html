@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#123d63">
+  <meta name="description" content="ระบบหลังบ้านสำหรับผู้ดูแลระบบ รพ.สต.วัดเกาะ">
+  <title>ระบบหลังบ้าน | รพ.สต.วัดเกาะ</title>
+
+  <!-- Font: วางไฟล์ THSarabunPSK.ttf ใน assets/fonts/ เพื่อใช้ฟอนต์ต้นฉบับ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+@font-face {
+  font-family: "THSarabunPSK";
+  src: url("assets/fonts/THSarabunPSK.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+</style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.min.css">
+  <style>
+:root {
+  --navy: #123d63;
+  --navy2: #174e7a;
+  --blue: #2473a8;
+  --teal: #16877b;
+  --green: #27845f;
+  --amber: #b7791f;
+  --red: #b84242;
+  --ink: #233547;
+  --muted: #718096;
+  --line: #e3eaf0;
+  --page: #f4f7fa;
+  --font: "THSarabunPSK","Sarabun",Tahoma,sans-serif;
+  --radius: 15px;
+}
+* {
+  box-sizing: border-box;
+}
+html,body {
+  margin: 0;
+  min-height: 100%;
+  font-family: var(--font);
+  font-size: 19px;
+  color: var(--ink);
+  background: var(--page);
+}
+button,input,select,textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+}
+.hidden {
+  display: none !important;
+}
+.muted {
+  color: var(--muted);
+}
+.small {
+  font-size: .85rem;
+}
+.login-screen {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(300px,1.05fr) minmax(320px,.95fr);
+  background: #fff;
+}
+.login-brand {
+  padding: clamp(32px,6vw,88px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #fff;
+  background: radial-gradient(circle at 80% 20%,rgba(72,151,191,.34),transparent 35%),linear-gradient(145deg,#0d3455,#174f78 58%,#1c6988);
+  position: relative;
+  overflow: hidden;
+}
+.brand-mark {
+  width: 72px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.4);
+  border-radius: 20px;
+  background: rgba(255,255,255,.12);
+  font-size: 2rem;
+}
+.login-brand h1 {
+  font-size: clamp(2rem,4vw,3.1rem);
+  line-height: 1.08;
+  margin: 24px 0 12px;
+}
+.login-brand p {
+  max-width: 520px;
+  line-height: 1.6;
+  color: rgba(255,255,255,.78);
+  margin: 0;
+}
+.login-panel {
+  display: grid;
+  place-items: center;
+  padding: 36px 24px;
+}
+.login-card {
+  width: min(100%,440px);
+}
+.login-card h2 {
+  font-size: 2rem;
+  margin: 0 0 6px;
+  color: var(--navy);
+}
+.login-card .sub {
+  color: var(--muted);
+  margin: 0 0 30px;
+}
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: #85a1b8;
+  font-size: .75rem;
+  font-weight: 700;
+}
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 13px;
+  min-width: 0;
+}
+.form-field label {
+  font-weight: 600;
+  color: #40566a;
+  font-size: .92rem;
+}
+.form-control {
+  border: 1px solid #d8e2ea;
+  border-radius: 10px;
+  background: #fff;
+  padding: 9px 13px;
+  min-height: 43px;
+  color: var(--ink);
+  width: 100%;
+  outline: none;
+}
+.form-control:focus {
+  border-color: #5b9ac2;
+  box-shadow: 0 0 0 3px rgba(36,115,168,.12);
+}
+textarea.form-control {
+  min-height: 90px;
+  resize: vertical;
+}
+.input-icon {
+  position: relative;
+}
+.input-icon .form-control {
+  padding-left: 42px;
+}
+.input-icon>i:first-child {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  color: #8aa0b2;
+}
+.password-toggle {
+  position: absolute;
+  right: 9px;
+  top: 7px;
+  border: 0;
+  background: transparent;
+  color: #8094a5;
+  padding: 6px;
+}
+.login-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 6px 0 22px;
+  color: var(--muted);
+  font-size: .9rem;
+}
+.check-line {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  cursor: pointer;
+}
+.check-line input {
+  accent-color: var(--blue);
+  width: 16px;
+  height: 16px;
+}
+.btn {
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: .92rem;
+  transition: .18s;
+  white-space: nowrap;
+}
+.btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--navy2);
+  color: #fff;
+  box-shadow: 0 5px 14px rgba(18,61,99,.16);
+}
+.btn-primary:hover {
+  background: #0f3f67;
+  transform: translateY(-1px);
+}
+.btn-outline {
+  border-color: #d6e0e8;
+  color: #40566a;
+  background: #fff;
+}
+.btn-soft {
+  background: #eaf3f9;
+  color: var(--navy2);
+}
+.btn-danger {
+  background: #fff0f0;
+  color: var(--red);
+  border-color: #f3d2d2;
+}
+.btn-success {
+  background: #eaf6ef;
+  color: var(--green);
+  border-color: #cce8d7;
+}
+.btn-block {
+  width: 100%;
+}
+.login-note {
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  margin-top: 22px;
+  text-align: center;
+  color: #9aa9b5;
+  font-size: .82rem;
+}
+.app-shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 265px minmax(0,1fr);
+}
+.sidebar {
+  background: #102f4b;
+  color: #d7e5ef;
+  padding: 20px 14px 18px;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+  z-index: 30;
+}
+.sidebar-brand {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  padding: 7px 10px 22px;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  margin-bottom: 16px;
+}
+.sidebar-logo {
+  width: 43px;
+  height: 43px;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,.12);
+  font-size: 1.25rem;
+}
+.sidebar-brand strong {
+  display: block;
+  font-size: 1.12rem;
+  color: #fff;
+  line-height: 1.05;
+}
+.sidebar-brand span {
+  font-size: .79rem;
+  color: #9bb4c8;
+}
+.nav-section {
+  color: #7897ae;
+  font-size: .74rem;
+  letter-spacing: .08em;
+  padding: 12px 12px 5px;
+  font-weight: 700;
+}
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  width: 100%;
+  color: #c0d1de;
+  background: transparent;
+  border-radius: 9px;
+  text-align: left;
+  padding: 9px 12px;
+  margin: 2px 0;
+  font-size: .91rem;
+}
+.nav-link i {
+  width: 19px;
+  text-align: center;
+  color: #86a8c0;
+}
+.nav-link:hover {
+  background: rgba(255,255,255,.07);
+  color: #fff;
+}
+.nav-link.active {
+  color: #fff;
+  background: #1c5a83;
+  box-shadow: inset 3px 0 #8bc6e8;
+}
+.nav-link.active i {
+  color: #b8e4fa;
+}
+.sidebar-bottom {
+  margin-top: auto;
+  border-top: 1px solid rgba(255,255,255,.1);
+  padding-top: 14px;
+}
+.side-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px 13px;
+}
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #dcecf6;
+  color: var(--navy);
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+.side-user strong {
+  color: #fff;
+  display: block;
+  font-size: .92rem;
+}
+.side-user span {
+  color: #9bb4c8;
+  font-size: .78rem;
+}
+.main-area {
+  min-width: 0;
+}
+.topbar {
+  height: 70px;
+  background: #fff;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.topbar h2 {
+  margin: 0;
+  font-size: 1.32rem;
+  color: var(--navy);
+}
+.topbar small {
+  display: block;
+  color: #93a2af;
+  font-size: .77rem;
+  margin-top: -2px;
+}
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.icon-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: #60798c;
+}
+.mobile-menu {
+  display: none;
+}
+.page-wrap {
+  padding: 26px 30px 40px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+.page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+}
+.page-heading h1 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 1.75rem;
+  line-height: 1.15;
+}
+.page-heading p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: .92rem;
+}
+.heading-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.grid {
+  display: grid;
+  gap: 16px;
+}
+.grid-4 {
+  grid-template-columns: repeat(4,minmax(0,1fr));
+}
+.grid-3 {
+  grid-template-columns: repeat(3,minmax(0,1fr));
+}
+.grid-2 {
+  grid-template-columns: repeat(2,minmax(0,1fr));
+}
+.panel {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  min-width: 0;
+}
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 19px;
+  border-bottom: 1px solid #edf1f5;
+}
+.panel-header h3 {
+  margin: 0;
+  color: #25445e;
+  font-size: 1.1rem;
+}
+.panel-body {
+  padding: 18px 19px;
+}
+.stat-card {
+  padding: 17px 18px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+}
+.stat-label {
+  color: #788c9c;
+  font-size: .85rem;
+}
+.stat-value {
+  font-size: 1.75rem;
+  color: var(--navy);
+  line-height: 1.1;
+  font-weight: 700;
+  margin-top: 3px;
+}
+.stat-foot {
+  color: #9aabb8;
+  font-size: .78rem;
+  margin-top: 4px;
+}
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  font-size: 1.22rem;
+  background: #edf5fa;
+  color: var(--blue);
+  flex: 0 0 auto;
+}
+.stat-icon.teal {
+  background: #e9f6f3;
+  color: var(--teal);
+}
+.stat-icon.amber {
+  background: #fff5e8;
+  color: var(--amber);
+}
+.stat-icon.red {
+  background: #fff0f0;
+  color: var(--red);
+}
+.toolbar {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.search-box {
+  position: relative;
+  min-width: 220px;
+  flex: 1;
+  max-width: 430px;
+}
+.search-box i {
+  position: absolute;
+  top: 13px;
+  left: 13px;
+  color: #96a7b5;
+}
+.search-box input {
+  padding-left: 38px;
+}
+.table-wrap {
+  overflow-x: auto;
+  width: 100%;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+  min-width: 700px;
+}
+th {
+  text-align: left;
+  color: #71879a;
+  font-size: .82rem;
+  font-weight: 700;
+  background: #f8fafc;
+  padding: 11px 13px;
+  white-space: nowrap;
+}
+td {
+  padding: 11px 13px;
+  border-top: 1px solid #edf1f4;
+  color: #40566a;
+  vertical-align: middle;
+}
+tr:hover td {
+  background: #fbfdfe;
+}
+.table-actions {
+  display: flex;
+  gap: 5px;
+}
+.mini-btn {
+  width: 32px;
+  height: 32px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  color: #577087;
+  background: #fff;
+}
+.status {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 100px;
+  padding: 3px 9px;
+  font-size: .78rem;
+  font-weight: 700;
+  white-space: nowrap;
+  background: #edf2f6;
+  color: #667d90;
+}
+.status.ok {
+  background: #e8f5ed;
+  color: #26744b;
+}
+.status.warn {
+  background: #fff4e4;
+  color: #9b671a;
+}
+.status.bad {
+  background: #fff0f0;
+  color: #ad4747;
+}
+.status.info {
+  background: #eaf3fa;
+  color: #28658e;
+}
+.empty-state {
+  text-align: center;
+  color: #91a1ad;
+  padding: 34px 15px;
+}
+.empty-state i {
+  font-size: 1.8rem;
+  display: block;
+  margin-bottom: 9px;
+  color: #b2c1cc;
+}
+.empty-state strong {
+  color: #6c8192;
+  display: block;
+}
+.notice {
+  border: 1px solid #dbe9f2;
+  background: #f2f8fc;
+  color: #4e6c82;
+  border-radius: 11px;
+  padding: 11px 14px;
+  font-size: .88rem;
+}
+.notice.warning {
+  border-color: #f0dfbd;
+  background: #fff9ef;
+  color: #80652f;
+}
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 12px;
+}
+.detail-item {
+  padding: 10px 12px;
+  background: #f7fafc;
+  border: 1px solid #edf2f6;
+  border-radius: 9px;
+  min-width: 0;
+}
+.detail-item span {
+  display: block;
+  color: #8a9aa7;
+  font-size: .78rem;
+}
+.detail-item strong {
+  display: block;
+  color: #324e63;
+  overflow-wrap: anywhere;
+  font-size: .94rem;
+}
+.chart-box {
+  height: 270px;
+  position: relative;
+}
+.profile-row {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.profile-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 17px;
+  display: grid;
+  place-items: center;
+  color: #15527c;
+  background: #e6f2f9;
+  font-size: 1.7rem;
+}
+.notice-grid {
+  display: grid;
+  gap: 8px;
+}
+.swal2-popup {
+  font-family: var(--font) !important;
+  border-radius: 17px !important;
+  font-size: 1rem !important;
+}
+.swal2-title {
+  font-size: 1.45rem !important;
+  color: var(--navy) !important;
+}
+.swal-form {
+  text-align: left;
+  max-height: 62vh;
+  overflow: auto;
+  padding: 4px 3px;
+}
+.swal-form .form-control {
+  font-size: .92rem;
+}
+@media (max-width:1120px) {
+  .grid-4 {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+  .app-shell {
+    grid-template-columns: 235px minmax(0,1fr);
+  }
+  .page-wrap {
+    padding: 22px;
+  }
+}
+@media (max-width:760px) {
+  .login-screen {
+    grid-template-columns: 1fr;
+  }
+  .login-brand {
+    min-height: 240px;
+    padding: 28px;
+  }
+  .login-brand h1 {
+    font-size: 2rem;
+  }
+  .brand-mark {
+    width: 54px;
+    height: 54px;
+  }
+  .app-shell {
+    display: block;
+  }
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    width: 264px;
+    transition: left .22s;
+    height: 100dvh;
+    min-height: 0;
+  }
+  .sidebar.open {
+    left: 0;
+  }
+  .mobile-menu {
+    display: inline-grid;
+    place-items: center;
+  }
+  .topbar {
+    padding: 0 15px;
+    height: 62px;
+  }
+  .topbar h2 {
+    font-size: 1.1rem;
+  }
+  .topbar small {
+    display: none;
+  }
+  .page-wrap {
+    padding: 18px 14px 30px;
+  }
+  .grid-4,.grid-3,.grid-2 {
+    grid-template-columns: 1fr;
+  }
+  .detail-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+  .search-box {
+    max-width: none;
+    min-width: 100%;
+  }
+}
+</style>
+</head>
+<body>
+  <div id="loginScreen" class="login-screen">
+    <section class="login-brand"><div><div class="brand-mark"><i class="fa-solid fa-sliders"></i></div><div class="eyebrow" style="color:#9fc5dc;margin-top:34px">Administration Console</div><h1>ระบบบริหารจัดการ<br>ฐานข้อมูลสุขภาพชุมชน</h1><p>สำหรับผู้ดูแลระบบ<br>โรงพยาบาลส่งเสริมสุขภาพตำบลวัดเกาะ อ.ศรีสำโรง จ.สุโขทัย</p></div><div class="small" style="color:rgba(255,255,255,.63)">สงวนสิทธิ์เฉพาะผู้ดูแลระบบที่ได้รับอนุญาต</div></section>
+    <section class="login-panel"><div class="login-card"><div class="eyebrow">Administrator Access</div><h2>เข้าสู่ระบบหลังบ้าน</h2><p class="sub">กรุณาใช้บัญชีผู้ดูแลระบบเพื่อเข้าสู่หน้าจัดการ</p><form id="loginForm"><div class="form-field"><label for="username">ชื่อผู้ใช้</label><div class="input-icon"><i class="fa-regular fa-user"></i><input id="username" class="form-control" autocomplete="username" required></div></div><div class="form-field"><label for="password">รหัสผ่าน</label><div class="input-icon"><i class="fa-solid fa-lock"></i><input id="password" class="form-control" type="password" autocomplete="current-password" required style="padding-right:48px"><button class="password-toggle" type="button" id="togglePassword"><i class="fa-regular fa-eye"></i></button></div></div><div class="login-options"><label class="check-line"><input id="rememberMe" type="checkbox"> จดจำการเข้าสู่ระบบ</label><span><i class="fa-solid fa-shield-halved"></i> Admin</span></div><button class="btn btn-primary btn-block" id="loginButton"><i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ</button></form><div class="login-note">หากไม่สามารถเข้าสู่ระบบได้ กรุณาติดต่อผู้ดูแลระบบหลัก</div></div></section>
+  </div>
+
+  <div id="appShell" class="app-shell hidden">
+    <aside id="sidebar" class="sidebar"><div class="sidebar-brand"><div class="sidebar-logo"><i class="fa-solid fa-house-medical"></i></div><div><strong>System Admin</strong><span>รพ.สต.วัดเกาะ</span></div></div><nav id="mainNav"></nav><div class="sidebar-bottom"><div class="side-user"><div class="avatar" id="sideAvatar">A</div><div><strong id="sideName">ผู้ดูแลระบบ</strong><span>Administrator</span></div></div><button class="nav-link" data-action="logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> ออกจากระบบ</button><a class="nav-link" href="index.html"><i class="fa-solid fa-arrow-up-right-from-square"></i> ไปหน้าระบบเจ้าหน้าที่</a></div></aside>
+    <main class="main-area"><header class="topbar"><div class="topbar-left"><button class="icon-button mobile-menu" id="mobileMenu"><i class="fa-solid fa-bars"></i></button><div><h2 id="topTitle">ภาพรวมระบบ</h2><small>ระบบแผนผังครอบครัวและฐานข้อมูลสุขภาพชุมชน</small></div></div><div class="top-actions"><button class="icon-button" data-view="notifications" title="การแจ้งเตือน"><i class="fa-regular fa-bell"></i></button></div></header><section id="pageContent" class="page-wrap"></section></main>
+  </div>
+  <div id="mobileOverlay" class="hidden" style="position:fixed;inset:0;background:rgba(8,24,38,.45);z-index:25"></div>
+  <iframe id="apiTransportFrame" name="apiTransportFrame" class="hidden" title="API transport"></iframe>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.5/dist/sweetalert2.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+'use strict';
+// ===================================================================================
+// 01. CONFIGURATION AND STATE
+// ===================================================================================
+const API_URL = 'PASTE_YOUR_CLOUDFLARE_WORKER_URL_HERE';
+const App = { token: '', user: null, view: 'overview', charts: [], cache: {}, systemHealth: null };
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const NAV = [
+    { section: 'ภาพรวมและทะเบียน' },
+    { id: 'overview', label: 'ภาพรวมระบบ', icon: 'fa-chart-pie' },
+    { id: 'households', label: 'จัดการครัวเรือน', icon: 'fa-house' },
+    { id: 'members', label: 'จัดการสมาชิก', icon: 'fa-users' },
+    { id: 'genogram', label: 'เครือญาติและความสัมพันธ์', icon: 'fa-diagram-project' },
+    { section: 'สุขภาพและการติดตาม' },
+    { id: 'screenings', label: 'คัดกรองสุขภาพ', icon: 'fa-heart-pulse' },
+    { id: 'chronic', label: 'โรคเรื้อรัง', icon: 'fa-notes-medical' },
+    { id: 'risks', label: 'ประเมินความเสี่ยง', icon: 'fa-triangle-exclamation' },
+    { id: 'vaccinations', label: 'วัคซีน', icon: 'fa-syringe' },
+    { id: 'visits', label: 'เยี่ยมบ้าน', icon: 'fa-house-medical-circle-check' },
+    { id: 'appointments', label: 'นัดหมายติดตาม', icon: 'fa-calendar-check' },
+    { section: 'ผู้ใช้งานและพื้นที่' },
+    { id: 'users', label: 'จัดการผู้ใช้งาน', icon: 'fa-user-shield' },
+    { id: 'villages', label: 'จัดการหมู่บ้าน', icon: 'fa-map-location-dot' },
+    { id: 'assignments', label: 'มอบหมายครัวเรือน', icon: 'fa-people-arrows-left-right' },
+    { section: 'ตรวจสอบและตั้งค่าระบบ' },
+    { id: 'approvals', label: 'ตรวจสอบข้อมูลจาก อสม.', icon: 'fa-clipboard-check' },
+    { id: 'lookups', label: 'ตัวเลือกข้อมูล', icon: 'fa-list-ul' },
+    { id: 'settings', label: 'ตั้งค่าระบบ', icon: 'fa-gears' },
+    { id: 'notifications', label: 'การแจ้งเตือน', icon: 'fa-bell' },
+    { id: 'audit', label: 'ประวัติการใช้งาน', icon: 'fa-user-clock' },
+    { id: 'logs', label: 'บันทึกระบบ', icon: 'fa-file-lines' },
+    { section: 'รายงานและบำรุงรักษา' },
+    { id: 'reports', label: 'รายงานและส่งออก', icon: 'fa-file-export' },
+    { id: 'import', label: 'นำเข้าข้อมูลจำนวนมาก', icon: 'fa-file-import' },
+    { id: 'backup', label: 'สำรองข้อมูล', icon: 'fa-database' },
+    { id: 'system', label: 'สถานะและเครื่องมือระบบ', icon: 'fa-screwdriver-wrench' },
+    { section: 'บัญชีผู้ดูแลระบบ' },
+    { id: 'profile', label: 'ข้อมูลบัญชี / เปลี่ยนรหัสผ่าน', icon: 'fa-user-gear' }
+];
+const LABELS = { ADMIN: 'ผู้ดูแลระบบ', OFFICER: 'เจ้าหน้าที่', VOLUNTEER: 'อสม.' };
+// ===================================================================================
+// 02. API COMMUNICATION THROUGH CLOUDFLARE WORKER (GAS BACKEND PROXY)
+// ===================================================================================
+function configured() { return API_URL && !API_URL.includes('PASTE_YOUR_') && /^https:\/\//i.test(API_URL); }
+function apiPublic(action) {
+    return new Promise((resolve, reject) => {
+        if (!configured())
+            return reject(new Error('ยังไม่ได้ตั้งค่า URL ของระบบฐานข้อมูล'));
+        const cb = 'watkAdminPublic_' + Math.random().toString(36).slice(2);
+        const script = document.createElement('script');
+        const timer = setTimeout(() => finish(new Error('การเชื่อมต่อใช้เวลานานเกินไป')), 15000);
+        function finish(err, data) {
+            clearTimeout(timer);
+            try {
+                delete window[cb];
+            }
+            catch (_) {
+                window[cb] = undefined;
+            }
+            script.remove();
+            err ? reject(err) : resolve(data);
+        }
+        window[cb] = data => finish(null, data);
+        script.onerror = () => finish(new Error('ไม่สามารถเชื่อมต่อบริการฐานข้อมูลได้'));
+        script.src = API_URL + (API_URL.includes('?') ? '&' : '?') + 'action=' + encodeURIComponent(action) + '&callback=' + encodeURIComponent(cb) + '&_=' + Date.now();
+        document.head.appendChild(script);
+    });
+}
+function api(action, data = {}) {
+    return new Promise((resolve, reject) => {
+        if (!configured())
+            return reject(new Error('ยังไม่ได้ตั้งค่า URL ของระบบฐานข้อมูลในตัวแปร API_URL'));
+        const nonce = crypto && crypto.randomUUID ? crypto.randomUUID() : ('n' + Date.now() + Math.random().toString(36).slice(2));
+        const frameName = 'admin_frame_' + nonce.replace(/[^a-zA-Z0-9]/g, '');
+        const frame = document.createElement('iframe');
+        frame.name = frameName;
+        frame.style.display = 'none';
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = API_URL;
+        form.target = frameName;
+        form.style.display = 'none';
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'payload';
+        input.value = JSON.stringify({ action, data, token: App.token, nonce, requestId: 'ADMIN-' + Date.now() });
+        form.appendChild(input);
+        let done = false;
+        const timer = setTimeout(() => finish(new Error('ไม่สามารถติดต่อฐานข้อมูลได้ กรุณาลองใหม่อีกครั้ง')), 30000);
+        function cleanup() { clearTimeout(timer); window.removeEventListener('message', onMessage); form.remove(); setTimeout(() => frame.remove(), 100); }
+        function finish(err, result) {
+            if (done)
+                return;
+            done = true;
+            cleanup();
+            if (err)
+                reject(err);
+            else if (result && result.success)
+                resolve(result.data);
+            else
+                reject(new Error(result && result.message || 'ไม่สามารถดำเนินการได้ กรุณาตรวจสอบข้อมูล'));
+        }
+        function onMessage(event) {
+            const m = event.data;
+            if (event.source !== frame.contentWindow || !m || m.__watkSystem !== true || m.nonce !== nonce)
+                return;
+            finish(null, m.payload);
+        }
+        window.addEventListener('message', onMessage);
+        document.body.appendChild(frame);
+        document.body.appendChild(form);
+        form.submit();
+    });
+}
+// ===================================================================================
+// 03. UI UTILITIES, ALERTS, TABLES, FORMS AND FILE DOWNLOADS
+// ===================================================================================
+function esc(v) { return String(v === undefined || v === null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function dateText(v) {
+    if (!v)
+        return '-';
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? esc(v) : d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+}
+function dateInput(v) {
+    if (!v)
+        return '';
+    const d = new Date(v);
+    return isNaN(d.getTime()) ? String(v).slice(0, 10) : d.toISOString().slice(0, 10);
+}
+function fmt(v) { return Number(v || 0).toLocaleString('th-TH'); }
+function toast(title, icon = 'success') { Swal.fire({ toast: true, position: 'top-end', icon, title, showConfirmButton: false, timer: 2400, timerProgressBar: true }); }
+function showError(err) { Swal.fire({ icon: 'error', title: 'ไม่สามารถดำเนินการได้', text: err && err.message ? err.message : 'กรุณาตรวจสอบข้อมูลและลองใหม่อีกครั้ง', confirmButtonText: 'รับทราบ' }); }
+function statusPill(v) { const s = String(v || '').toUpperCase(); const cls = ['APPROVED', 'ACTIVE', 'ALIVE', 'SUCCESS', 'NORMAL'].includes(s) ? 'ok' : ['PENDING', 'RETURNED', 'MEDIUM'].includes(s) ? 'warn' : ['REJECTED', 'ARCHIVED', 'HIGH', 'ERROR'].includes(s) ? 'bad' : 'info'; return `<span class="status ${cls}">${esc(({ PENDING: 'รอตรวจสอบ', APPROVED: 'อนุมัติแล้ว', RETURNED: 'ส่งกลับแก้ไข', REJECTED: 'ไม่อนุมัติ', ACTIVE: 'ใช้งาน', ARCHIVED: 'เก็บถาวร' }[s] || s || '-'))}</span>`; }
+function heading(title, desc, actions = '') { return `<div class="page-heading"><div><h1>${title}</h1><p>${desc || ''}</p></div><div class="heading-actions">${actions}</div></div>`; }
+function panel(title, body) { return `<section class="panel"><div class="panel-header"><h3>${title}</h3></div><div class="panel-body">${body}</div></section>`; }
+function stat(label, value, icon, color = '') { return `<div class="panel stat-card"><div><div class="stat-label">${label}</div><div class="stat-value">${fmt(value)}</div></div><div class="stat-icon ${color}"><i class="fa-solid ${icon}"></i></div></div>`; }
+function empty(title = 'ยังไม่มีข้อมูล', desc = 'เมื่อมีข้อมูล ระบบจะแสดงรายการในส่วนนี้') { return `<div class="empty-state"><i class="fa-regular fa-folder-open"></i><strong>${title}</strong><span>${desc}</span></div>`; }
+function mini(action, id, title = 'จัดการ', icon = 'fa-ellipsis') { return `<button class="mini-btn" data-action="${action}" data-id="${esc(id)}" title="${title}"><i class="fa-solid ${icon}"></i></button>`; }
+function table(columns, rows, actions = '') {
+    if (!rows || !rows.length)
+        return empty();
+    return `<div class="table-wrap"><table><thead><tr>${columns.map(c => `<th>${c.label}</th>`).join('')}${actions ? '<th>จัดการ</th>' : ''}</tr></thead><tbody>${rows.map(r => `<tr>${columns.map(c => `<td>${c.render ? c.render(r) : esc(r[c.key] || '-')}</td>`).join('')}${actions ? `<td><div class="table-actions">${actions.split(',').map(a => mini(a, r[columns.idKey || 'user_id'] || r.household_id || r.member_id || r.submission_id || r.village_id || r.assignment_id || r.lookup_id || r.setting_key || r.audit_id || r.notification_id || r.visit_id || r.appointment_id || r.screening_id || r.chronic_id || r.risk_id || r.vaccination_id || '', a, ({ view: 'fa-eye', edit: 'fa-pen', archive: 'fa-box-archive', toggle: 'fa-power-off', reset: 'fa-key', approve: 'fa-check', review: 'fa-clipboard-check', return: 'fa-rotate-left' }[a] || 'fa-ellipsis'))).join('')}</div></td>` : ''}</tr>`).join('')}</tbody></table></div>`;
+}
+const OPTIONS = {
+    role: [['ADMIN', 'ผู้ดูแลระบบ'], ['OFFICER', 'เจ้าหน้าที่'], ['VOLUNTEER', 'อสม.']],
+    gender: [['MALE', 'ชาย'], ['FEMALE', 'หญิง'], ['OTHER', 'อื่น ๆ']],
+    household_status: [['NORMAL', 'ปกติ'], ['AT_RISK', 'ต้องติดตาม'], ['VACANT', 'ไม่มีผู้อยู่อาศัย']],
+    risk_level: [['LOW', 'ต่ำ'], ['MEDIUM', 'ปานกลาง'], ['HIGH', 'สูง']],
+    living_status: [['ALIVE', 'มีชีวิต'], ['MOVED_OUT', 'ย้ายออก'], ['DECEASED', 'เสียชีวิต']],
+    care_level: [['INDEPENDENT', 'ช่วยเหลือตนเองได้'], ['HOMEBOUND', 'ติดบ้าน'], ['BEDRIDDEN', 'ติดเตียง']],
+    marital_status: [['SINGLE', 'โสด'], ['MARRIED', 'สมรส'], ['WIDOWED', 'หม้าย'], ['DIVORCED', 'หย่า'], ['SEPARATED', 'แยกกันอยู่']],
+    control_status: [['CONTROLLED', 'ควบคุมได้'], ['UNCONTROLLED', 'ควบคุมไม่ได้'], ['UNKNOWN', 'ไม่ทราบ']], overall_risk_level: [['LOW', 'ต่ำ'], ['MEDIUM', 'ปานกลาง'], ['HIGH', 'สูง']],
+    smoking_status: [['NEVER', 'ไม่สูบ'], ['CURRENT', 'สูบ'], ['FORMER', 'เคยสูบ']],
+    alcohol_status: [['NEVER', 'ไม่ดื่ม'], ['CURRENT', 'ดื่ม'], ['FORMER', 'เคยดื่ม']],
+    appointment_status: [['SCHEDULED', 'นัดหมายแล้ว'], ['COMPLETED', 'รับบริการแล้ว'], ['CANCELLED', 'ยกเลิก'], ['MISSED', 'ไม่มาตามนัด']],
+    visit_type: [['GENERAL', 'ทั่วไป'], ['CHRONIC', 'ติดตามโรคเรื้อรัง'], ['HOMEBOUND', 'ติดบ้าน'], ['BEDRIDDEN', 'ติดเตียง']],
+    relation_type: [['FATHER', 'บิดา'], ['MOTHER', 'มารดา'], ['SON', 'บุตรชาย'], ['DAUGHTER', 'บุตรสาว'], ['SPOUSE', 'คู่สมรส'], ['SIBLING', 'พี่น้อง'], ['GRANDPARENT', 'ปู่/ย่า/ตา/ยาย'], ['OTHER', 'อื่น ๆ']]
+};
+function renderField(f, i) {
+    const id = 'field_' + f.name + '_' + i;
+    const value = f.value ?? '';
+    let c = '';
+    if (f.type === 'textarea')
+        c = `<textarea class="form-control" id="${id}" name="${esc(f.name)}" ${f.required ? 'required' : ''}>${esc(value)}</textarea>`;
+    else if (f.type === 'select') {
+        const opts = f.options || OPTIONS[f.name] || [];
+        c = `<select class="form-control" id="${id}" name="${esc(f.name)}" ${f.required ? 'required' : ''}><option value="">เลือก${esc(f.label)}</option>${opts.map(o => { const v = Array.isArray(o) ? o[0] : o.value; const l = Array.isArray(o) ? o[1] : o.label; return `<option value="${esc(v)}" ${String(value) === String(v) ? 'selected' : ''}>${esc(l)}</option>`; }).join('')}</select>`;
+    }
+    else if (f.type === 'checkbox')
+        c = `<label class="check-line"><input type="checkbox" id="${id}" name="${esc(f.name)}" ${value ? 'checked' : ''}> ${esc(f.checkboxLabel || f.label)}</label>`;
+    else if (f.type === 'file')
+        c = `<input class="form-control" type="file" id="${id}" name="${esc(f.name)}" accept="${esc(f.accept || 'image/*')}">`;
+    else if (f.type === 'hidden')
+        c = `<input type="hidden" id="${id}" name="${esc(f.name)}" value="${esc(value)}">`;
+    else
+        c = `<input class="form-control" id="${id}" name="${esc(f.name)}" type="${esc(f.type || 'text')}" value="${esc(value)}" ${f.required ? 'required' : ''} ${f.step ? `step="${f.step}"` : ''} ${f.maxLength ? `maxlength="${f.maxLength}"` : ''}>`;
+    return `<div class="form-field" style="${f.full ? 'grid-column:1/-1' : ''}"><label for="${id}">${esc(f.label)}${f.required ? ' *' : ''}</label>${c}${f.help ? `<small class="muted">${esc(f.help)}</small>` : ''}</div>`;
+}
+async function formModal(title, fields, save, opts = {}) {
+    const html = `<form id="adminDynamicForm" class="swal-form"><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 13px">${fields.map(renderField).join('')}</div>${opts.note ? `<div class="notice" style="margin-top:8px">${opts.note}</div>` : ''}</form>`;
+    const result = await Swal.fire({ title, html, width: opts.width || 780, showCancelButton: true, confirmButtonText: opts.confirmText || 'บันทึกข้อมูล', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#174e7a', preConfirm: () => {
+            const form = $('#adminDynamicForm');
+            if (!form.reportValidity())
+                return false;
+            const out = {};
+            fields.forEach(f => {
+                const el = form.querySelector(`[name="${CSS.escape(f.name)}"]`);
+                if (el)
+                    out[f.name] = f.type === 'checkbox' ? el.checked : (f.type === 'file' ? (el.files && el.files[0] ? el.files[0] : null) : el.value);
+            });
+            return out;
+        } });
+    if (!result.isConfirmed)
+        return;
+    try {
+        Swal.fire({ title: 'กำลังบันทึกข้อมูล', allowOutsideClick: false, allowEscapeKey: false, didOpen: () => Swal.showLoading() });
+        await save(result.value);
+        Swal.close();
+        toast(opts.success || 'บันทึกข้อมูลเรียบร้อยแล้ว');
+    }
+    catch (e) {
+        Swal.close();
+        showError(e);
+    }
+}
+function download(content, mime, name) { const blob = content instanceof Blob ? content : new Blob([content], { type: mime }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1500); }
+function downloadCsv(rows, headers, name) { const csv = [headers, ...rows.map(r => headers.map(h => r[h] ?? ''))].map(row => row.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\r\n'); download('\ufeff' + csv, 'text/csv;charset=utf-8', name); }
+async function uploadImage(file) {
+    if (!file)
+        return '';
+    if (!file.type.startsWith('image/'))
+        throw new Error('กรุณาเลือกไฟล์รูปภาพ');
+    if (file.size > 8 * 1024 * 1024)
+        throw new Error('รูปภาพมีขนาดเกิน 8 MB');
+    const dataUrl = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = () => reject(new Error('ไม่สามารถอ่านรูปภาพได้')); reader.readAsDataURL(file); });
+    const result = await api('files.uploadImage', { base64: dataUrl, mimeType: file.type, fileName: file.name });
+    return result.url;
+}
+async function exportExcel(type) { const r = await api('reports.exportData', { report_type: type }); const ws = XLSX.utils.json_to_sheet(r.rows || []); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, type.slice(0, 31)); XLSX.writeFile(wb, `รายงาน_${type}_${new Date().toISOString().slice(0, 10)}.xlsx`); }
+// ===================================================================================
+// 04. AUTHENTICATION AND ROLE GUARD
+// ===================================================================================
+function readToken() { return localStorage.getItem('watk_session') || sessionStorage.getItem('watk_session') || ''; }
+function writeToken(token, remember) { localStorage.removeItem('watk_session'); sessionStorage.removeItem('watk_session'); (remember ? localStorage : sessionStorage).setItem('watk_session', token); }
+function clearToken() { localStorage.removeItem('watk_session'); sessionStorage.removeItem('watk_session'); App.token = ''; App.user = null; }
+async function init() {
+    $('#togglePassword').addEventListener('click', () => { const x = $('#password'); const show = x.type === 'password'; x.type = show ? 'text' : 'password'; $('#togglePassword').innerHTML = `<i class="fa-regular ${show ? 'fa-eye-slash' : 'fa-eye'}"></i>`; });
+    $('#loginForm').addEventListener('submit', login);
+    $('#mobileMenu').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
+    $('#mobileOverlay').addEventListener('click', closeNav);
+    document.addEventListener('click', onClick);
+    App.token = readToken();
+    if (App.token) {
+        try {
+            const me = await api('auth.me');
+            App.user = me.user || me;
+            if (App.user.role !== 'ADMIN') {
+                clearToken();
+                showLogin();
+                await Swal.fire({ icon: 'warning', title: 'ไม่มีสิทธิ์เข้าถึง', text: 'หน้านี้สำหรับผู้ดูแลระบบเท่านั้น' });
+                return;
+            }
+            await enterApp();
+        }
+        catch (_) {
+            clearToken();
+            showLogin();
+        }
+    }
+    else
+        showLogin();
+}
+function showLogin() { $('#loginScreen').classList.remove('hidden'); $('#appShell').classList.add('hidden'); }
+async function login(e) {
+    e.preventDefault();
+    const b = $('#loginButton');
+    b.disabled = true;
+    b.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบ';
+    try {
+        const r = await api('auth.login', { username: $('#username').value.trim(), password: $('#password').value, rememberMe: $('#rememberMe').checked, deviceLabel: navigator.userAgent.slice(0, 120) });
+        if (!r.user || r.user.role !== 'ADMIN') {
+            App.token = r.token;
+            try {
+                await api('auth.logout', {});
+            }
+            catch (_) { }
+            throw new Error('บัญชีนี้ไม่มีสิทธิ์เข้าใช้งานระบบหลังบ้าน');
+        }
+        App.token = r.token;
+        App.user = r.user;
+        writeToken(r.token, $('#rememberMe').checked);
+        await enterApp();
+    }
+    catch (err) {
+        showError(err);
+    }
+    finally {
+        b.disabled = false;
+        b.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ';
+    }
+}
+async function enterApp() {
+    $('#loginScreen').classList.add('hidden');
+    $('#appShell').classList.remove('hidden');
+    $('#sideName').textContent = App.user.full_name || App.user.username;
+    $('#sideAvatar').textContent = (App.user.full_name || 'A').charAt(0);
+    buildNav();
+    await navigate('overview');
+    if (App.user.must_change_password)
+        changePassword(true);
+}
+async function logout() {
+    try {
+        await api('auth.logout', {});
+    }
+    catch (_) { }
+    clearToken();
+    showLogin();
+    toast('ออกจากระบบแล้ว');
+}
+function closeNav() { $('#sidebar').classList.remove('open'); $('#mobileOverlay').classList.add('hidden'); }
+// ===================================================================================
+// 05. NAVIGATION AND PAGE ROUTER
+// ===================================================================================
+function buildNav() { $('#mainNav').innerHTML = NAV.map(n => n.section ? `<div class="nav-section">${n.section}</div>` : `<button class="nav-link ${App.view === n.id ? 'active' : ''}" data-view="${n.id}"><i class="fa-solid ${n.icon}"></i><span>${n.label}</span></button>`).join(''); }
+async function navigate(view) {
+    App.view = view;
+    buildNav();
+    closeNav();
+    $('#topTitle').textContent = (NAV.find(n => n.id === view) || {}).label || 'ระบบหลังบ้าน';
+    $('#pageContent').innerHTML = empty('กำลังโหลดข้อมูล', 'กรุณารอสักครู่');
+    try {
+        switch (view) {
+            case 'overview':
+                await renderOverview();
+                break;
+            case 'users':
+                await renderUsers();
+                break;
+            case 'villages':
+                await renderVillages();
+                break;
+            case 'households':
+                await renderEntity('households');
+                break;
+            case 'members':
+                await renderEntity('members');
+                break;
+            case 'genogram':
+                await renderGenogram();
+                break;
+            case 'screenings':
+                await renderEntity('screenings');
+                break;
+            case 'chronic':
+                await renderEntity('chronic');
+                break;
+            case 'risks':
+                await renderEntity('risks');
+                break;
+            case 'vaccinations':
+                await renderEntity('vaccinations');
+                break;
+            case 'visits':
+                await renderEntity('visits');
+                break;
+            case 'appointments':
+                await renderEntity('appointments');
+                break;
+            case 'assignments':
+                await renderAssignments();
+                break;
+            case 'approvals':
+                await renderApprovals();
+                break;
+            case 'lookups':
+                await renderLookups();
+                break;
+            case 'settings':
+                await renderSettings();
+                break;
+            case 'notifications':
+                await renderNotifications();
+                break;
+            case 'audit':
+                await renderAudit();
+                break;
+            case 'logs':
+                await renderLogs();
+                break;
+            case 'reports':
+                renderReports();
+                break;
+            case 'import':
+                renderImport();
+                break;
+            case 'backup':
+                renderBackup();
+                break;
+            case 'system':
+                await renderSystem();
+                break;
+            case 'profile':
+                renderProfile();
+                break;
+            default: $('#pageContent').innerHTML = empty('ไม่พบเมนู');
+        }
+    }
+    catch (e) {
+        showError(e);
+        $('#pageContent').innerHTML = empty('ไม่สามารถโหลดข้อมูลได้', 'กรุณาลองใหม่อีกครั้ง');
+    }
+}
+// ===================================================================================
+// 06. ADMIN DASHBOARD AND SUMMARY
+// ===================================================================================
+async function renderOverview() {
+    const r = await api('dashboard.stats', {});
+    const t = r.totals || {};
+    App.charts.forEach(c => c.destroy());
+    App.charts = [];
+    $('#pageContent').innerHTML = heading('ภาพรวมระบบ', 'สถานะฐานข้อมูลและตัวชี้วัดประชากรในพื้นที่') + `<div class="grid grid-4">${stat('ครัวเรือนทั้งหมด', t.households, 'fa-house')}${stat('ประชากรทั้งหมด', t.population, 'fa-users', 'teal')}${stat('ผู้สูงอายุ', t.olderAdults, 'fa-person-cane', 'amber')}${stat('รายการรอตรวจสอบ', t.pendingApprovals, 'fa-clipboard-check', 'red')}${stat('ผู้ป่วยเบาหวาน', t.diabetes, 'fa-droplet', 'red')}${stat('ผู้ป่วยความดัน', t.hypertension, 'fa-heart-pulse', 'amber')}${stat('ผู้พิการ', t.disability, 'fa-wheelchair', 'teal')}${stat('เยี่ยมบ้านเดือนนี้', t.visitsThisMonth, 'fa-house-medical')}</div><div class="grid grid-2" style="margin-top:17px">${panel('ประชากรตามช่วงอายุ', '<div class="chart-box"><canvas id="ageChart"></canvas></div>')}${panel('ประชากรตามเพศ', '<div class="chart-box"><canvas id="genderChart"></canvas></div>')}</div><div class="grid grid-2" style="margin-top:17px">${panel('สรุปการดำเนินงาน', `<div class="detail-grid">${[['ครัวเรือนเสี่ยงสูง', t.highRiskHouseholds], ['ผู้ป่วยติดบ้าน', t.homebound], ['ผู้ป่วยติดเตียง', t.bedridden], ['การเยี่ยมบ้านทั้งหมด', t.homeVisits], ['อสม. ที่ใช้งาน', t.volunteers], ['เจ้าหน้าที่ที่ใช้งาน', t.officers]].map(x => `<div class="detail-item"><span>${x[0]}</span><strong>${fmt(x[1])}</strong></div>`).join('')}</div>`)}${panel('ทางลัดสำหรับผู้ดูแลระบบ', `<div class="grid grid-2"><button class="btn btn-soft" data-view="users"><i class="fa-solid fa-user-shield"></i> จัดการบัญชี</button><button class="btn btn-soft" data-view="approvals"><i class="fa-solid fa-clipboard-check"></i> ตรวจสอบข้อมูล</button><button class="btn btn-soft" data-view="backup"><i class="fa-solid fa-database"></i> สำรองข้อมูล</button><button class="btn btn-soft" data-view="system"><i class="fa-solid fa-screwdriver-wrench"></i> เครื่องมือระบบ</button></div><p class="muted small" style="margin:15px 0 0">ข้อมูลปรับปรุงเมื่อ ${dateText(r.updatedAt)}</p>`)}</div>`;
+    if (window.Chart) {
+        App.charts.push(new Chart($('#ageChart'), { type: 'bar', data: { labels: (r.ageGroups || []).map(x => x.label), datasets: [{ label: 'คน', data: (r.ageGroups || []).map(x => x.count), backgroundColor: '#4d91ba', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } }));
+        App.charts.push(new Chart($('#genderChart'), { type: 'doughnut', data: { labels: (r.gender || []).map(x => x.label), datasets: [{ data: (r.gender || []).map(x => x.count), backgroundColor: ['#3d82ac', '#bb7ea4', '#9caebc'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } }));
+    }
+}
+// ===================================================================================
+// 07. USER ADMINISTRATION
+// ===================================================================================
+async function renderUsers(query = '') {
+    const r = await api('users.list', { query, page: 1, pageSize: 200 });
+    App.cache.users = r.items || [];
+    const cols = [{ key: 'username', label: 'ชื่อผู้ใช้' }, { key: 'full_name', label: 'ชื่อ-นามสกุล' }, { key: 'role', label: 'บทบาท', render: x => LABELS[x.role] || x.role }, { key: 'phone', label: 'โทรศัพท์' }, { key: 'assigned_moo', label: 'หมู่ที่รับผิดชอบ' }, { key: 'is_active', label: 'สถานะ', render: x => statusPill(x.is_active ? 'ACTIVE' : 'DISABLED') }, { key: 'last_login_at', label: 'เข้าใช้ล่าสุด', render: x => dateText(x.last_login_at) }];
+    $('#pageContent').innerHTML = heading('จัดการผู้ใช้งาน', 'สร้างและกำหนดสิทธิ์บัญชีเจ้าหน้าที่และ อสม.', '<button class="btn btn-primary" data-action="add-user"><i class="fa-solid fa-user-plus"></i> เพิ่มผู้ใช้งาน</button>') + `<section class="panel"><div class="panel-header"><h3>บัญชีผู้ใช้งาน</h3><span class="status info">${fmt(r.total)} บัญชี</span></div><div class="panel-body"><div class="toolbar"><div class="search-box"><i class="fa-solid fa-search"></i><input id="userSearch" class="form-control" placeholder="ค้นหาชื่อผู้ใช้ ชื่อ หรือเบอร์โทร" value="${esc(query)}"></div><button class="btn btn-outline" data-action="refresh-users"><i class="fa-solid fa-rotate"></i> รีเฟรช</button></div><div style="margin-top:14px">${table(cols, App.cache.users, 'edit,toggle,reset')}</div></div></section>`;
+    $('#userSearch').addEventListener('keydown', e => {
+        if (e.key === 'Enter')
+            renderUsers(e.target.value.trim());
+    });
+}
+async function userForm(row = null) {
+    const fields = [{ name: 'username', label: 'ชื่อผู้ใช้', required: !row, value: row?.username, help: row ? 'ไม่สามารถเปลี่ยนชื่อผู้ใช้ผ่านแบบฟอร์มนี้' : '' }, { name: 'password', label: 'รหัสผ่านเริ่มต้น', type: 'password', required: !row, help: 'อย่างน้อย 10 ตัวอักษร' }, { name: 'full_name', label: 'ชื่อ-นามสกุล', required: true, value: row?.full_name }, { name: 'role', label: 'บทบาท', type: 'select', required: true, value: row?.role || 'VOLUNTEER' }, { name: 'phone', label: 'โทรศัพท์', value: row?.phone }, { name: 'email', label: 'อีเมล', type: 'email', value: row?.email }, { name: 'assigned_moo', label: 'หมู่ที่รับผิดชอบ', value: row?.assigned_moo }, { name: 'is_active', label: 'เปิดใช้งานบัญชี', type: 'checkbox', value: row?.is_active ?? true }, { name: 'notes', label: 'หมายเหตุ', type: 'textarea', full: true, value: row?.notes }];
+    await formModal(row ? 'แก้ไขผู้ใช้งาน' : 'เพิ่มผู้ใช้งาน', fields, async (v) => {
+        if (row) {
+            delete v.password;
+            await api('users.update', { user_id: row.user_id, ...v });
+        }
+        else {
+            await api('users.create', v);
+        }
+        await renderUsers();
+    }, { width: 850, note: 'บัญชีใหม่จะกำหนดให้เปลี่ยนรหัสผ่านเมื่อเข้าสู่ระบบครั้งแรก' });
+}
+async function resetUserPassword(id) {
+    const r = await Swal.fire({ title: 'รีเซ็ตรหัสผ่าน', input: 'password', inputLabel: 'รหัสผ่านใหม่ (อย่างน้อย 10 ตัวอักษร)', inputAttributes: { minlength: 10, autocomplete: 'new-password' }, showCancelButton: true, confirmButtonText: 'รีเซ็ตรหัสผ่าน', cancelButtonText: 'ยกเลิก', preConfirm: v => {
+            if (!v || v.length < 10) {
+                Swal.showValidationMessage('รหัสผ่านต้องมีอย่างน้อย 10 ตัวอักษร');
+                return false;
+            }
+            return v;
+        } });
+    if (r.isConfirmed) {
+        await api('users.resetPassword', { user_id: id, newPassword: r.value });
+        toast('รีเซ็ตรหัสผ่านเรียบร้อยแล้ว');
+    }
+}
+// ===================================================================================
+// 08. VILLAGE AND HOUSEHOLD ASSIGNMENT MANAGEMENT
+// ===================================================================================
+async function renderVillages() { const r = await api('villages.list', { page: 1, pageSize: 200 }); const rows = r.items || []; App.cache.villages = rows; const cols = [{ key: 'moo', label: 'หมู่ที่' }, { key: 'village_name', label: 'ชื่อหมู่บ้าน' }, { key: 'subdistrict', label: 'ตำบล' }, { key: 'district', label: 'อำเภอ' }, { key: 'village_head_name', label: 'ผู้ใหญ่บ้าน' }, { key: 'village_head_phone', label: 'โทรศัพท์' }]; $('#pageContent').innerHTML = heading('จัดการหมู่บ้าน', 'กำหนดข้อมูลพื้นที่และรายละเอียดหมู่บ้าน', '<button class="btn btn-primary" data-action="add-village"><i class="fa-solid fa-plus"></i> เพิ่มหมู่บ้าน</button>') + `<section class="panel"><div class="panel-header"><h3>พื้นที่ในระบบ</h3><span class="status info">${fmt(r.total)} หมู่บ้าน</span></div><div class="panel-body">${table(cols, rows, 'edit')}</div></section>`; }
+async function villageForm(row = null) { const fields = [{ name: 'moo', label: 'หมู่ที่', type: 'number', required: true, value: row?.moo }, { name: 'village_name', label: 'ชื่อหมู่บ้าน', required: true, value: row?.village_name }, { name: 'subdistrict', label: 'ตำบล', value: row?.subdistrict || 'วัดเกาะ' }, { name: 'district', label: 'อำเภอ', value: row?.district || 'ศรีสำโรง' }, { name: 'province', label: 'จังหวัด', value: row?.province || 'สุโขทัย' }, { name: 'postal_code', label: 'รหัสไปรษณีย์', value: row?.postal_code }, { name: 'latitude', label: 'ละติจูด', type: 'number', value: row?.latitude }, { name: 'longitude', label: 'ลองจิจูด', type: 'number', value: row?.longitude }, { name: 'village_head_name', label: 'ชื่อผู้ใหญ่บ้าน', value: row?.village_head_name }, { name: 'village_head_phone', label: 'โทรศัพท์ผู้ใหญ่บ้าน', value: row?.village_head_phone }, { name: 'notes', label: 'หมายเหตุ', type: 'textarea', full: true, value: row?.notes }]; await formModal(row ? 'แก้ไขหมู่บ้าน' : 'เพิ่มหมู่บ้าน', fields, async (v) => { await api(row ? 'villages.update' : 'villages.create', { ...(row ? { village_id: row.village_id } : {}), ...v }); await renderVillages(); }); }
+async function renderAssignments() { const r = await api('assignments.list', { page: 1, pageSize: 200 }); const rows = r.items || []; App.cache.assignments = rows; const cols = [{ key: 'household_id', label: 'รหัสครัวเรือน' }, { key: 'volunteer_name', label: 'อสม.' }, { key: 'officer_name', label: 'เจ้าหน้าที่' }, { key: 'assigned_from', label: 'เริ่มรับผิดชอบ', render: x => dateText(x.assigned_from) }, { key: 'assigned_to', label: 'สิ้นสุด', render: x => dateText(x.assigned_to) }, { key: 'is_primary', label: 'ผู้รับผิดชอบหลัก', render: x => x.is_primary ? 'ใช่' : 'ไม่ใช่' }]; $('#pageContent').innerHTML = heading('มอบหมายครัวเรือน', 'จัดการความรับผิดชอบครัวเรือนให้ อสม. และเจ้าหน้าที่', '<button class="btn btn-primary" data-action="add-assignment"><i class="fa-solid fa-plus"></i> มอบหมาย</button>') + `<section class="panel"><div class="panel-header"><h3>รายการมอบหมาย</h3></div><div class="panel-body">${table(cols, rows, 'edit,archive')}</div></section>`; }
+async function assignmentForm(row = null) {
+    const [hh, users] = await Promise.all([api('households.list', { page: 1, pageSize: 200 }), api('users.list', { page: 1, pageSize: 200 })]);
+    const options = (hh.items || []).map(h => ({ value: h.household_id, label: `บ้าน ${h.house_number} หมู่ ${h.moo}` }));
+    const volunteers = (users.items || []).filter(u => u.role === 'VOLUNTEER').map(u => ({ value: u.user_id, label: u.full_name }));
+    const officers = (users.items || []).filter(u => u.role === 'OFFICER').map(u => ({ value: u.user_id, label: u.full_name }));
+    const fields = [{ name: 'household_id', label: 'ครัวเรือน', type: 'select', required: true, options, value: row?.household_id }, { name: 'volunteer_id', label: 'อสม.', type: 'select', required: true, options: volunteers, value: row?.volunteer_id }, { name: 'volunteer_name', label: 'ชื่อ อสม.', value: row?.volunteer_name }, { name: 'officer_id', label: 'เจ้าหน้าที่', type: 'select', options: officers, value: row?.officer_id }, { name: 'officer_name', label: 'ชื่อเจ้าหน้าที่', value: row?.officer_name }, { name: 'assigned_from', label: 'วันที่เริ่ม', type: 'date', value: dateInput(row?.assigned_from) }, { name: 'assigned_to', label: 'วันที่สิ้นสุด', type: 'date', value: dateInput(row?.assigned_to) }, { name: 'is_primary', label: 'ผู้รับผิดชอบหลัก', type: 'checkbox', value: row?.is_primary ?? true }, { name: 'notes', label: 'หมายเหตุ', type: 'textarea', full: true, value: row?.notes }];
+    await formModal(row ? 'แก้ไขการมอบหมาย' : 'มอบหมายครัวเรือน', fields, async (v) => {
+        const selected = volunteers.find(x => x.value === v.volunteer_id);
+        if (selected && !v.volunteer_name)
+            v.volunteer_name = selected.label;
+        await api(row ? 'assignments.update' : 'assignments.create', { ...(row ? { assignment_id: row.assignment_id } : {}), ...v });
+        await renderAssignments();
+    }, { width: 850 });
+}
+// ===================================================================================
+// 09. GENERIC RECORD MODULES: HOUSEHOLDS, MEMBERS, HEALTH, VISITS, APPOINTMENTS
+// ===================================================================================
+const MODULES = {
+    households: { title: 'จัดการครัวเรือน', desc: 'จัดการข้อมูลทะเบียนครัวเรือน', list: 'households.list', create: 'households.create', update: 'households.update', archive: 'households.archive', id: 'household_id', columns: [['household_code', 'รหัส'], ['house_number', 'บ้านเลขที่'], ['moo', 'หมู่ที่'], ['household_head_name', 'หัวหน้าครอบครัว'], ['member_count', 'สมาชิก'], ['risk_level', 'ระดับความเสี่ยง']], fields: [['house_number', 'บ้านเลขที่', 'text', true], ['moo', 'หมู่ที่', 'number', true], ['soi', 'ซอย'], ['road', 'ถนน'], ['subdistrict', 'ตำบล', 'text', false, 'วัดเกาะ'], ['district', 'อำเภอ', 'text', false, 'ศรีสำโรง'], ['province', 'จังหวัด', 'text', false, 'สุโขทัย'], ['postal_code', 'รหัสไปรษณีย์'], ['household_head_member_id', 'รหัสสมาชิกหัวหน้าครอบครัว'], ['household_head_name', 'ชื่อหัวหน้าครอบครัว'], ['household_status', 'สถานะครัวเรือน', 'select'], ['risk_level', 'ระดับความเสี่ยง', 'select'], ['latitude', 'ละติจูด', 'number'], ['longitude', 'ลองจิจูด', 'number'], ['responsible_volunteer_id', 'รหัส อสม.'], ['responsible_volunteer_name', 'ชื่อ อสม.'], ['responsible_officer_id', 'รหัสเจ้าหน้าที่'], ['responsible_officer_name', 'ชื่อเจ้าหน้าที่'], ['next_followup_date', 'วันติดตาม', 'date'], ['notes', 'หมายเหตุ', 'textarea'], ['house_photo', 'ภาพถ่ายบ้าน', 'file']] },
+    members: { title: 'จัดการสมาชิก', desc: 'จัดการทะเบียนสมาชิกครอบครัว', list: 'members.list', create: 'members.create', update: 'members.update', archive: 'members.archive', id: 'member_id', columns: [['first_name', 'ชื่อ-นามสกุล', 'full'], ['household_id', 'รหัสครัวเรือน'], ['gender', 'เพศ'], ['age', 'อายุ'], ['phone', 'โทรศัพท์'], ['care_level', 'ภาวะพึ่งพิง']], fields: [['household_id', 'รหัสครัวเรือน', 'text', true], ['title', 'คำนำหน้า'], ['first_name', 'ชื่อ', 'text', true], ['last_name', 'นามสกุล', 'text', true], ['nickname', 'ชื่อเล่น'], ['national_id', 'เลขบัตรประชาชน'], ['gender', 'เพศ', 'select'], ['date_of_birth', 'วันเกิด', 'date'], ['phone', 'โทรศัพท์'], ['relationship_to_head', 'ความสัมพันธ์'], ['marital_status', 'สถานภาพสมรส', 'select'], ['religion', 'ศาสนา'], ['education', 'การศึกษา'], ['occupation', 'อาชีพ'], ['monthly_income', 'รายได้', 'number'], ['health_right', 'สิทธิการรักษา'], ['health_right_hospital', 'หน่วยบริการ'], ['disability_status', 'เป็นผู้พิการ', 'checkbox'], ['disability_type', 'ประเภทความพิการ'], ['living_status', 'สถานะ', 'select'], ['care_level', 'ระดับการดูแล', 'select'], ['care_status', 'สถานะการดูแล'], ['blood_group', 'หมู่เลือด'], ['drug_allergy', 'แพ้ยา'], ['medical_history', 'ประวัติสุขภาพ', 'textarea'], ['emergency_contact_name', 'ผู้ติดต่อฉุกเฉิน'], ['emergency_contact_phone', 'โทรศัพท์ฉุกเฉิน'], ['notes', 'หมายเหตุ', 'textarea'], ['member_photo', 'รูปสมาชิก', 'file']] },
+    screenings: { title: 'คัดกรองสุขภาพ', desc: 'ประวัติผลตรวจและคัดกรองสุขภาพ', list: 'health.screenings.list', create: 'health.screenings.create', update: 'health.screenings.update', id: 'screening_id', date: 'screening_date', columns: [['screening_date', 'วันที่'], ['member_id', 'รหัสสมาชิก'], ['bmi', 'BMI'], ['systolic_bp', 'ความดันตัวบน'], ['diastolic_bp', 'ความดันตัวล่าง'], ['blood_glucose_fbs', 'FBS'], ['screening_result', 'ผล']], fields: [['member_id', 'รหัสสมาชิก', 'text', true], ['household_id', 'รหัสครัวเรือน'], ['screening_date', 'วันที่คัดกรอง', 'date', true], ['weight_kg', 'น้ำหนัก', 'number'], ['height_cm', 'ส่วนสูง', 'number'], ['bmi', 'BMI', 'number'], ['waist_cm', 'รอบเอว', 'number'], ['systolic_bp', 'ความดันตัวบน', 'number'], ['diastolic_bp', 'ความดันตัวล่าง', 'number'], ['pulse_rate', 'ชีพจร', 'number'], ['blood_glucose_fbs', 'FBS', 'number'], ['blood_glucose_rbs', 'RBS', 'number'], ['total_cholesterol', 'Cholesterol', 'number'], ['triglycerides', 'Triglycerides', 'number'], ['hdl', 'HDL', 'number'], ['ldl', 'LDL', 'number'], ['smoking_status', 'สูบบุหรี่', 'select'], ['alcohol_status', 'ดื่มสุรา', 'select'], ['exercise_frequency', 'ออกกำลังกาย'], ['diet_sweet', 'กินหวาน'], ['diet_fat', 'กินมัน'], ['diet_salty', 'กินเค็ม'], ['stress_level', 'ความเครียด'], ['fall_risk', 'เสี่ยงหกล้ม'], ['screening_result', 'ผลคัดกรอง'], ['abnormal_flag', 'พบความผิดปกติ', 'checkbox'], ['abnormal_details', 'รายละเอียด', 'textarea'], ['advice', 'คำแนะนำ', 'textarea'], ['next_followup_date', 'ติดตามครั้งถัดไป', 'date'], ['notes', 'หมายเหตุ', 'textarea']] },
+    chronic: { title: 'โรคเรื้อรัง', desc: 'ข้อมูลการวินิจฉัยและติดตามโรคเรื้อรัง', list: 'health.chronic.list', create: 'health.chronic.create', update: 'health.chronic.update', id: 'chronic_id', date: 'diagnosis_date', columns: [['disease_name', 'โรค'], ['disease_code', 'รหัส'], ['member_id', 'รหัสสมาชิก'], ['diagnosis_date', 'วันที่วินิจฉัย'], ['control_status', 'การควบคุม'], ['next_followup_date', 'นัดติดตาม']], fields: [['member_id', 'รหัสสมาชิก', 'text', true], ['household_id', 'รหัสครัวเรือน'], ['disease_code', 'รหัสโรค'], ['disease_name', 'ชื่อโรค', 'text', true], ['diagnosis_date', 'วันที่วินิจฉัย', 'date'], ['diagnosis_hospital', 'สถานพยาบาลที่วินิจฉัย'], ['treatment_hospital', 'สถานพยาบาลรักษา'], ['medication', 'ยา', 'textarea'], ['treatment_plan', 'แผนการรักษา', 'textarea'], ['control_status', 'ควบคุมโรค', 'select'], ['last_followup_date', 'ติดตามล่าสุด', 'date'], ['next_followup_date', 'ติดตามครั้งถัดไป', 'date'], ['complications', 'ภาวะแทรกซ้อน', 'textarea'], ['care_level', 'ระดับการดูแล', 'select'], ['caregiver_member_id', 'รหัสผู้ดูแล'], ['referral_status', 'สถานะส่งต่อ'], ['referral_hospital', 'สถานพยาบาลส่งต่อ'], ['notes', 'หมายเหตุ', 'textarea']] },
+    risks: { title: 'ประเมินความเสี่ยง', desc: 'ประเมินพฤติกรรมและปัจจัยเสี่ยงสุขภาพ', list: 'health.risks.list', create: 'health.risks.create', update: 'health.risks.update', id: 'risk_id', date: 'assessment_date', columns: [['assessment_date', 'วันที่ประเมิน'], ['member_id', 'รหัสสมาชิก'], ['overall_risk_level', 'ระดับความเสี่ยง'], ['smoking_status', 'สูบบุหรี่'], ['alcohol_status', 'ดื่มสุรา'], ['next_assessment_date', 'ประเมินครั้งถัดไป']], fields: [['member_id', 'รหัสสมาชิก', 'text', true], ['household_id', 'รหัสครัวเรือน'], ['assessment_date', 'วันที่ประเมิน', 'date', true], ['family_history_dm_ht_asthma', 'ประวัติครอบครัว'], ['smoking_status', 'สูบบุหรี่', 'select'], ['alcohol_status', 'ดื่มสุรา', 'select'], ['low_exercise', 'ออกกำลังกายน้อย'], ['salty_food', 'อาหารเค็ม'], ['fatty_food', 'อาหารมัน'], ['sweet_food', 'อาหารหวาน'], ['obesity_risk', 'เสี่ยงอ้วน'], ['stress_level', 'ความเครียด'], ['sexual_health_risk', 'ความเสี่ยงสุขภาพทางเพศ'], ['fall_risk', 'เสี่ยงหกล้ม'], ['overall_risk_level', 'ระดับความเสี่ยง', 'select'], ['advice', 'คำแนะนำ', 'textarea'], ['next_assessment_date', 'ประเมินครั้งถัดไป', 'date'], ['notes', 'หมายเหตุ', 'textarea']] },
+    vaccinations: { title: 'ประวัติวัคซีน', desc: 'ทะเบียนการรับวัคซีนและนัดหมายเข็มถัดไป', list: 'health.vaccinations.list', create: 'health.vaccinations.create', update: 'health.vaccinations.update', id: 'vaccination_id', date: 'vaccination_date', columns: [['vaccine_name', 'วัคซีน'], ['member_id', 'สมาชิก'], ['dose_number', 'เข็ม'], ['vaccination_date', 'วันที่รับ'], ['next_dose_date', 'เข็มถัดไป'], ['provider_hospital', 'หน่วยบริการ']], fields: [['member_id', 'รหัสสมาชิก', 'text', true], ['household_id', 'รหัสครัวเรือน'], ['vaccine_name', 'ชื่อวัคซีน', 'text', true], ['vaccine_code', 'รหัสวัคซีน'], ['dose_number', 'เข็ม', 'number'], ['vaccination_date', 'วันที่รับวัคซีน', 'date', true], ['next_dose_date', 'นัดเข็มถัดไป', 'date'], ['provider_hospital', 'หน่วยบริการ'], ['lot_number', 'เลข Lot'], ['notes', 'หมายเหตุ', 'textarea']] },
+    visits: { title: 'เยี่ยมบ้าน', desc: 'บันทึกการเยี่ยมบ้านและผลการดูแล', list: 'visits.list', create: 'visits.create', update: 'visits.update', id: 'visit_id', date: 'visit_date', columns: [['visit_date', 'วันที่เยี่ยม'], ['household_id', 'ครัวเรือน'], ['member_id', 'สมาชิก'], ['visit_type', 'ประเภท'], ['volunteer_name', 'อสม.'], ['visit_result', 'ผล']], fields: [['household_id', 'รหัสครัวเรือน', 'text', true], ['member_id', 'รหัสสมาชิก'], ['visit_date', 'วันที่เยี่ยม', 'date', true], ['visit_purpose', 'วัตถุประสงค์'], ['visit_type', 'ประเภท', 'select'], ['volunteer_id', 'รหัส อสม.'], ['volunteer_name', 'ชื่อ อสม.'], ['home_condition', 'สภาพบ้าน', 'textarea'], ['patient_condition', 'สภาพผู้ป่วย', 'textarea'], ['symptoms', 'อาการ', 'textarea'], ['problems_found', 'ปัญหาที่พบ', 'textarea'], ['services_provided', 'บริการที่ให้', 'textarea'], ['advice_given', 'คำแนะนำ', 'textarea'], ['referral_needed', 'ส่งต่อ', 'text'], ['referral_detail', 'รายละเอียดส่งต่อ', 'textarea'], ['followup_date', 'ติดตามครั้งถัดไป', 'date'], ['visit_result', 'ผลการเยี่ยม'], ['notes', 'หมายเหตุ', 'textarea'], ['visit_photo', 'ภาพประกอบ', 'file']] },
+    appointments: { title: 'นัดหมาย', desc: 'กำหนดนัดและติดตามการรับบริการ', list: 'appointments.list', create: 'appointments.create', update: 'appointments.update', id: 'appointment_id', date: 'appointment_date', columns: [['appointment_date', 'วันที่นัด'], ['appointment_time', 'เวลา'], ['member_id', 'สมาชิก'], ['appointment_type', 'ประเภท'], ['service_location', 'สถานที่'], ['appointment_status', 'สถานะ']], fields: [['member_id', 'รหัสสมาชิก', 'text', true], ['household_id', 'รหัสครัวเรือน'], ['appointment_date', 'วันที่นัด', 'date', true], ['appointment_time', 'เวลา', 'time'], ['appointment_type', 'ประเภทนัด'], ['service_location', 'สถานที่'], ['provider_name', 'ผู้ให้บริการ'], ['purpose', 'วัตถุประสงค์', 'textarea'], ['appointment_status', 'สถานะ', 'select'], ['result_note', 'ผลการติดตาม', 'textarea']] }
+};
+async function renderEntity(type, query = '') {
+    const c = MODULES[type];
+    let data = { page: 1, pageSize: 200 };
+    if (query)
+        data.query = query;
+    const r = await api(c.list, data);
+    const rows = r.items || [];
+    App.cache[type] = rows;
+    const cols = c.columns.map(([key, label, format]) => ({ key, label, render: x => format === 'full' ? `${esc(x.title || '')}${esc(x.first_name)} ${esc(x.last_name)}` : key.includes('date') ? dateText(x[key]) : key === 'risk_level' || key === 'control_status' || key === 'appointment_status' ? statusPill(x[key]) : esc(x[key] || '-') }));
+    const actions = type === 'households' ? 'view,edit,archive' : type === 'members' ? 'view,edit,archive' : 'edit';
+    $('#pageContent').innerHTML = heading(c.title, c.desc, `<button class="btn btn-primary" data-action="add-record" data-type="${type}"><i class="fa-solid fa-plus"></i> เพิ่มรายการ</button>`) + `<section class="panel"><div class="panel-header"><h3>รายการข้อมูล</h3><span class="status info">${fmt(r.total)} รายการ</span></div><div class="panel-body"><div class="toolbar"><div class="search-box"><i class="fa-solid fa-search"></i><input id="moduleSearch" class="form-control" placeholder="ค้นหาข้อมูล" value="${esc(query)}"></div><button class="btn btn-outline" data-action="refresh-module" data-type="${type}"><i class="fa-solid fa-rotate"></i></button><button class="btn btn-outline" data-action="module-xlsx" data-type="${type}"><i class="fa-solid fa-file-excel"></i> Excel</button></div><div style="margin-top:14px">${table(cols, rows, actions)}</div></div></section>`;
+    $('#moduleSearch').addEventListener('keydown', e => {
+        if (e.key === 'Enter')
+            renderEntity(type, e.target.value.trim());
+    });
+}
+async function recordForm(type, row = null) {
+    const c = MODULES[type];
+    const fields = c.fields.map(([name, label, kind, required, defaultValue]) => ({ name, label, type: kind || 'text', required: !!required, value: row?.[name] ?? defaultValue ?? '' }));
+    await formModal(row ? 'แก้ไข' + c.title : 'เพิ่ม' + c.title, fields, async (v) => {
+        const imageField = type === 'households' ? 'house_photo' : type === 'members' ? 'member_photo' : type === 'visits' ? 'visit_photo' : '';
+        const imageFile = imageField ? v[imageField] : null;
+        if (imageField)
+            delete v[imageField];
+        if (imageFile) {
+            const url = await uploadImage(imageFile);
+            if (type === 'households')
+                v.house_photo_url = url;
+            else if (type === 'members')
+                v.photo_url = url;
+            else
+                v.photo_urls_json = JSON.stringify([url]);
+        }
+        await api(row ? c.update : c.create, { ...(row ? { [c.id]: row[c.id] } : {}), ...v });
+        await renderEntity(type);
+    }, { width: 900, note: 'กรุณาตรวจสอบรหัสครัวเรือนและรหัสสมาชิกก่อนบันทึก' });
+}
+async function renderGenogram() { const r = await api('households.list', { page: 1, pageSize: 200 }); const opts = r.items || []; $('#pageContent').innerHTML = heading('เครือญาติและความสัมพันธ์', 'จัดการความสัมพันธ์สมาชิกและตรวจสอบแฟ้มเครือญาติ') + `<section class="panel"><div class="panel-body"><div class="toolbar"><select id="genoSelect" class="form-control" style="max-width:450px"><option value="">เลือกครัวเรือน</option>${opts.map(h => `<option value="${esc(h.household_id)}">บ้าน ${esc(h.house_number)} หมู่ ${esc(h.moo)} — ${esc(h.household_head_name || '')}</option>`).join('')}</select><button class="btn btn-primary" data-action="load-genogram"><i class="fa-solid fa-diagram-project"></i> แสดง</button></div><div id="genoResult" style="margin-top:15px">${empty('เลือกครัวเรือน')}</div></div></section>`; }
+async function loadGenogram(id) {
+    if (!id)
+        return;
+    const d = await api('households.dossier', { household_id: id });
+    App.cache.dossier = d;
+    const nodes = (d.members || []).map(m => `<div class="detail-item" style="text-align:center;min-width:150px"><i class="fa-solid ${String(m.gender).toUpperCase() === 'FEMALE' ? 'fa-person-dress' : 'fa-person'}" style="font-size:1.6rem;color:#36799f"></i><strong>${esc(m.first_name)} ${esc(m.last_name)}</strong><span>${esc(m.relationship_to_head || 'สมาชิก')} · ${esc(m.age || '-')} ปี</span></div>`).join('');
+    const relations = (d.relations || []).map(r => {
+        const member = (d.members || []).find(m => m.member_id === r.member_id) || {};
+        const related = (d.members || []).find(m => m.member_id === r.related_member_id) || {};
+        return `<div class="detail-item">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+          <div><strong>${esc(member.first_name || r.member_id)} ↔ ${esc(related.first_name || r.related_member_id)}</strong><span>${esc(r.relation_type || '-')} ${r.marriage_status ? '· ' + esc(r.marriage_status) : ''}</span></div>
+          <div class="table-actions">
+            <button class="mini-btn" data-action="edit-relation" data-id="${esc(r.relation_id)}" title="แก้ไขความสัมพันธ์"><i class="fa-solid fa-pen"></i></button>
+            <button class="mini-btn" data-action="delete-relation" data-id="${esc(r.relation_id)}" data-household-id="${esc(id)}" title="เก็บถาวรความสัมพันธ์"><i class="fa-solid fa-box-archive"></i></button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    $('#genoResult').innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px"><strong>บ้าน ${esc(d.household.house_number)} หมู่ ${esc(d.household.moo)}</strong><button class="btn btn-primary" data-action="add-relation" data-id="${esc(id)}"><i class="fa-solid fa-link"></i> เพิ่มความสัมพันธ์</button></div><div class="panel-body" style="background:#f8fbfd;border:1px dashed #cbdbe5;border-radius:10px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center">${nodes || empty('ไม่มีสมาชิก')}</div><h3 style="font-size:1.05rem">ความสัมพันธ์ที่บันทึก</h3><div class="detail-grid">${relations || '<span class="muted">ยังไม่มีรายการ</span>'}</div>`;
+}
+async function relationForm(householdId, row = null) {
+    const d = App.cache.dossier && App.cache.dossier.household && App.cache.dossier.household.household_id === householdId ? App.cache.dossier : await api('households.dossier', { household_id: householdId });
+    const options = (d.members || []).map(m => ({ value: m.member_id, label: `${m.first_name} ${m.last_name}` }));
+    const fields = [
+        { name: 'household_id', label: 'ครัวเรือน', type: 'hidden', value: householdId },
+        { name: 'member_id', label: 'สมาชิกคนที่ 1', type: 'select', required: true, options, value: row?.member_id || '' },
+        { name: 'related_member_id', label: 'สมาชิกคนที่ 2', type: 'select', required: true, options, value: row?.related_member_id || '' },
+        { name: 'relation_type', label: 'ความสัมพันธ์', type: 'select', required: true, value: row?.relation_type || '' },
+        { name: 'marriage_status', label: 'สถานภาพสมรส', type: 'select', value: row?.marriage_status || '' },
+        { name: 'is_biological', label: 'เป็นความสัมพันธ์ทางสายเลือด', type: 'checkbox', value: row ? Boolean(row.is_biological) : true },
+        { name: 'genogram_note', label: 'หมายเหตุ', type: 'textarea', full: true, value: row?.genogram_note || '' }
+    ];
+    await formModal(row ? 'แก้ไขความสัมพันธ์' : 'เพิ่มความสัมพันธ์', fields, async (v) => {
+        const action = row ? 'relations.update' : 'relations.create';
+        await api(action, { ...(row ? { relation_id: row.relation_id } : {}), ...v });
+        await loadGenogram(householdId);
+    });
+}
+// ===================================================================================
+// 10. APPROVAL QUEUE
+// ===================================================================================
+async function renderApprovals() { const r = await api('approvals.list', { submission_status: 'PENDING', page: 1, pageSize: 200 }); App.cache.approvals = r.items || []; const cols = [{ key: 'created_at', label: 'ส่งเมื่อ', render: x => dateText(x.created_at) }, { key: 'submitter_name', label: 'อสม.' }, { key: 'entity_type', label: 'ประเภท' }, { key: 'action_type', label: 'การดำเนินการ' }, { key: 'submission_status', label: 'สถานะ', render: x => statusPill(x.submission_status) }]; $('#pageContent').innerHTML = heading('ตรวจสอบข้อมูลจาก อสม.', 'ตรวจสอบ อนุมัติ ส่งกลับแก้ไข หรือไม่อนุมัติข้อมูลที่ส่งเข้าระบบ', '<button class="btn btn-outline" data-action="refresh-approvals"><i class="fa-solid fa-rotate"></i> รีเฟรช</button>') + `<section class="panel"><div class="panel-header"><h3>รายการรอตรวจสอบ</h3><span class="status warn">${fmt(r.total)} รายการ</span></div><div class="panel-body">${table(cols, App.cache.approvals, 'review')}</div></section>`; }
+async function reviewSubmission(id) {
+    const item = App.cache.approvals.find(x => x.submission_id === id) || null;
+    const all = item ? item : (await api('approvals.list', { page: 1, pageSize: 200 })).items.find(x => x.submission_id === id);
+    if (!all)
+        throw new Error('ไม่พบรายการที่ต้องการตรวจสอบ');
+    let payload = {};
+    try {
+        payload = JSON.parse(all.payload_json || '{}');
+    }
+    catch (_) { }
+    const details = Object.entries(payload).map(([k, v]) => `<div class="detail-item"><span>${esc(k)}</span><strong>${esc(typeof v === 'object' ? JSON.stringify(v) : v)}</strong></div>`).join('');
+    const r = await Swal.fire({ title: 'ตรวจสอบข้อมูลจาก อสม.', html: `<div style="text-align:left"><div class="detail-grid">${[['ผู้ส่ง', all.submitter_name], ['ประเภท', all.entity_type], ['ส่งเมื่อ', dateText(all.created_at)]].map(x => `<div class="detail-item"><span>${x[0]}</span><strong>${esc(x[1])}</strong></div>`).join('')}</div><h3 style="font-size:1rem;margin:14px 0 8px">รายละเอียดที่ส่ง</h3><div class="detail-grid">${details}</div><label class="form-field" style="margin-top:13px">ผลการตรวจสอบ<select id="reviewDecision" class="form-control"><option value="APPROVE">อนุมัติ</option><option value="RETURN">ส่งกลับแก้ไข</option><option value="REJECT">ไม่อนุมัติ</option></select></label><label class="form-field">หมายเหตุการตรวจสอบ<textarea id="reviewNote" class="form-control"></textarea></label></div>`, width: 960, showCancelButton: true, confirmButtonText: 'บันทึกผล', cancelButtonText: 'ปิด', confirmButtonColor: '#174e7a', preConfirm: () => ({ decision: $('#reviewDecision').value, review_note: $('#reviewNote').value }) });
+    if (r.isConfirmed) {
+        await api('approvals.review', { submission_id: id, ...r.value });
+        toast('บันทึกผลการตรวจสอบแล้ว');
+        await renderApprovals();
+    }
+}
+// ===================================================================================
+// 11. LOOKUP VALUES AND SYSTEM SETTINGS
+// ===================================================================================
+async function renderLookups() { const r = await api('lookups.list', {}); App.cache.lookups = r || []; const cols = [{ key: 'lookup_group', label: 'กลุ่มข้อมูล' }, { key: 'lookup_code', label: 'รหัส' }, { key: 'lookup_label', label: 'รายการ' }, { key: 'sort_order', label: 'ลำดับ' }, { key: 'is_active', label: 'สถานะ', render: x => statusPill(x.is_active ? 'ACTIVE' : 'INACTIVE') }]; $('#pageContent').innerHTML = heading('ตัวเลือกข้อมูล', 'จัดการค่ามาตรฐานที่ใช้ในแบบฟอร์ม เช่น อาชีพ สิทธิการรักษา และประเภทโรค', '<button class="btn btn-primary" data-action="add-lookup"><i class="fa-solid fa-plus"></i> เพิ่มตัวเลือก</button>') + `<section class="panel"><div class="panel-header"><h3>รายการตัวเลือก</h3></div><div class="panel-body">${table(cols, App.cache.lookups, 'edit')}</div></section>`; }
+async function lookupForm(row = null) { const fields = [{ name: 'lookup_group', label: 'กลุ่มข้อมูล', required: true, value: row?.lookup_group }, { name: 'lookup_code', label: 'รหัสตัวเลือก', required: true, value: row?.lookup_code }, { name: 'lookup_label', label: 'ชื่อแสดงผล', required: true, value: row?.lookup_label }, { name: 'sort_order', label: 'ลำดับ', type: 'number', value: row?.sort_order || 999 }, { name: 'is_active', label: 'เปิดใช้งาน', type: 'checkbox', value: row?.is_active ?? true }, { name: 'notes', label: 'หมายเหตุ', type: 'textarea', full: true, value: row?.notes }]; await formModal(row ? 'แก้ไขตัวเลือก' : 'เพิ่มตัวเลือก', fields, async (v) => { await api('lookups.save', v); await renderLookups(); }); }
+async function renderSettings() { const r = await api('settings.list', {}); App.cache.settings = r || []; const cols = [{ key: 'setting_key', label: 'ชื่อการตั้งค่า' }, { key: 'setting_value', label: 'ค่า', render: x => `<span style="overflow-wrap:anywhere">${esc(x.setting_value)}</span>` }, { key: 'description', label: 'คำอธิบาย' }, { key: 'updated_at', label: 'แก้ไขล่าสุด', render: x => dateText(x.updated_at) }]; $('#pageContent').innerHTML = heading('ตั้งค่าระบบ', 'จัดการค่าการทำงานของระบบ คีย์ลับและ URL สำคัญยังต้องเก็บใน Script Properties', '<button class="btn btn-primary" data-action="add-setting"><i class="fa-solid fa-plus"></i> เพิ่มการตั้งค่า</button>') + `<div class="notice warning" style="margin-bottom:14px">ห้ามบันทึก Google Spreadsheet ID, ImgBB API Key, รหัสผ่าน หรือข้อมูลลับลงในค่าตั้งค่าที่แสดงบนหน้าเว็บ ให้จัดเก็บใน Script Properties เท่านั้น</div><section class="panel"><div class="panel-header"><h3>System Settings</h3></div><div class="panel-body">${table(cols, App.cache.settings, 'edit')}</div></section>`; }
+async function settingForm(row = null) { const fields = [{ name: 'setting_key', label: 'ชื่อการตั้งค่า', required: true, value: row?.setting_key }, { name: 'setting_value', label: 'ค่า', required: true, value: row?.setting_value }, { name: 'description', label: 'คำอธิบาย', type: 'textarea', full: true, value: row?.description }]; await formModal(row ? 'แก้ไขการตั้งค่า' : 'เพิ่มการตั้งค่า', fields, async (v) => { await api('settings.update', v); await renderSettings(); }); }
+// ===================================================================================
+// 12. NOTIFICATIONS, AUDIT AND SYSTEM LOGS
+// ===================================================================================
+async function renderNotifications() { const r = await api('notifications.list', { page: 1, pageSize: 200 }); const rows = r.items || []; $('#pageContent').innerHTML = heading('การแจ้งเตือน', 'รายการแจ้งเตือนที่ระบบส่งถึงบัญชีผู้ดูแลระบบ') + `<section class="panel"><div class="panel-body">${rows.length ? rows.map(n => `<div class="profile-row" style="padding:11px 0;border-bottom:1px solid #edf1f4"><div class="stat-icon"><i class="fa-regular fa-bell"></i></div><div style="flex:1"><strong>${esc(n.title)}</strong><div class="muted small">${esc(n.message)} · ${dateText(n.created_at)}</div></div>${n.is_read ? '' : `<button class="btn btn-soft" data-action="mark-notification" data-id="${esc(n.notification_id)}">อ่านแล้ว</button>`}</div>`).join('') : empty()}</div></section>`; }
+async function renderAudit() { const r = await api('audit.list', { page: 1, pageSize: 200 }); const cols = [{ key: 'event_time', label: 'เวลา', render: x => dateText(x.event_time) }, { key: 'username', label: 'ผู้ใช้' }, { key: 'full_name', label: 'ชื่อ' }, { key: 'role', label: 'บทบาท' }, { key: 'action', label: 'การกระทำ' }, { key: 'entity_type', label: 'ประเภทข้อมูล' }, { key: 'description', label: 'รายละเอียด' }, { key: 'result', label: 'ผล', render: x => statusPill(x.result) }]; $('#pageContent').innerHTML = heading('ประวัติการใช้งาน', 'ตรวจสอบว่าใครทำรายการใด เมื่อใด และกับข้อมูลประเภทใด') + `<section class="panel"><div class="panel-header"><h3>Audit Log</h3><span class="status info">${fmt(r.total)} รายการ</span></div><div class="panel-body">${table(cols, r.items || '')}</div></section>`; }
+async function renderLogs() { const r = await api('system.logs.list', { page: 1, pageSize: 200 }); const cols = [{ key: 'event_time', label: 'เวลา', render: x => dateText(x.event_time) }, { key: 'level', label: 'ระดับ', render: x => statusPill(x.level) }, { key: 'component', label: 'ส่วนระบบ' }, { key: 'message', label: 'ข้อความ' }, { key: 'request_id', label: 'Request ID' }]; $('#pageContent').innerHTML = heading('บันทึกการทำงานของระบบ', 'ตรวจสอบเหตุการณ์และข้อผิดพลาดภายใน โดยแสดงเฉพาะข้อความที่ผู้ดูแลระบบจำเป็นต้องใช้') + `<section class="panel"><div class="panel-header"><h3>System Log</h3><span class="status info">${fmt(r.total)} รายการ</span></div><div class="panel-body">${table(cols, r.items || '')}</div></section>`; }
+// ===================================================================================
+// 13. REPORTS, IMPORTS, BACKUP AND SYSTEM MAINTENANCE
+// ===================================================================================
+function renderReports() { const types = [['households', 'ครัวเรือน'], ['members', 'สมาชิก'], ['screenings', 'คัดกรองสุขภาพ'], ['chronic', 'โรคเรื้อรัง'], ['risks', 'ความเสี่ยง'], ['vaccinations', 'วัคซีน'], ['visits', 'เยี่ยมบ้าน'], ['appointments', 'นัดหมาย'], ['approvals', 'ข้อมูล อสม.']]; $('#pageContent').innerHTML = heading('รายงานและส่งออก', 'ดาวน์โหลดข้อมูลในรูปแบบ Excel หรือ CSV ลงอุปกรณ์โดยตรง') + `<div class="grid grid-3">${types.map(([t, l]) => `<section class="panel"><div class="panel-body"><div class="profile-row"><div class="stat-icon"><i class="fa-solid fa-file-lines"></i></div><strong>${l}</strong></div><div class="toolbar" style="margin-top:14px"><button class="btn btn-primary" data-action="export-xlsx" data-type="${t}"><i class="fa-solid fa-file-excel"></i> Excel</button><button class="btn btn-outline" data-action="export-csv" data-type="${t}"><i class="fa-solid fa-file-csv"></i> CSV</button></div></div></section>`).join('')}</div>`; }
+function renderImport() { $('#pageContent').innerHTML = heading('นำเข้าข้อมูลจำนวนมาก', 'นำเข้าไฟล์ CSV หรือ Excel โดยอ่านไฟล์ในเบราว์เซอร์และส่งรายการไปยัง API') + `<section class="panel"><div class="panel-body"><div class="notice warning">นำเข้าได้ไม่เกิน 250 รายการต่อครั้ง ระบบจะตรวจสอบแต่ละรายการและรายงานจำนวนที่สำเร็จหรือไม่สำเร็จ ควรทดลองกับไฟล์ตัวอย่างก่อนนำเข้าจริง</div><div class="grid grid-2" style="margin-top:16px"><div class="form-field"><label>ประเภทข้อมูล</label><select id="importType" class="form-control"><option value="HOUSEHOLDS">ครัวเรือน</option><option value="FAMILY_MEMBERS">สมาชิกครอบครัว</option><option value="HEALTH_SCREENING">คัดกรองสุขภาพ</option><option value="CHRONIC_DISEASE">โรคเรื้อรัง</option><option value="HEALTH_RISK">ประเมินความเสี่ยง</option><option value="VACCINATIONS">วัคซีน</option><option value="HOME_VISITS">เยี่ยมบ้าน</option><option value="APPOINTMENTS">นัดหมาย</option></select></div><div class="form-field"><label>เลือกไฟล์ CSV / XLSX</label><input id="importFile" type="file" accept=".csv,.xlsx,.xls" class="form-control"></div></div><button class="btn btn-primary" data-action="run-import"><i class="fa-solid fa-file-import"></i> ตรวจสอบและนำเข้า</button><div id="importResult" style="margin-top:16px"></div></div></section>`; }
+async function executeImport() {
+    const file = $('#importFile').files[0];
+    if (!file)
+        throw new Error('กรุณาเลือกไฟล์ก่อน');
+    const type = $('#importType').value;
+    const buffer = await file.arrayBuffer();
+    const wb = XLSX.read(buffer, { type: 'array', cellDates: false });
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { defval: '' });
+    if (!rows.length)
+        throw new Error('ไม่พบรายการข้อมูลในไฟล์');
+    if (rows.length > 250)
+        throw new Error('นำเข้าได้ไม่เกิน 250 รายการต่อครั้ง');
+    const confirm = await Swal.fire({ icon: 'question', title: 'ยืนยันการนำเข้าข้อมูล', text: `พบข้อมูล ${rows.length} แถว ต้องการดำเนินการหรือไม่`, showCancelButton: true, confirmButtonText: 'นำเข้า', cancelButtonText: 'ยกเลิก' });
+    if (!confirm.isConfirmed)
+        return;
+    const r = await api('import.bulk', { entity_type: type, items: rows });
+    $('#importResult').innerHTML = `<div class="detail-grid"><div class="detail-item"><span>ทั้งหมด</span><strong>${fmt(r.total)}</strong></div><div class="detail-item"><span>สำเร็จ</span><strong>${fmt(r.succeeded)}</strong></div><div class="detail-item"><span>ไม่สำเร็จ</span><strong>${fmt(r.failed)}</strong></div></div><div style="margin-top:12px">${table([{ key: 'row', label: 'แถว' }, { key: 'success', label: 'ผล', render: x => statusPill(x.success ? 'SUCCESS' : 'ERROR') }, { key: 'record_id', label: 'รหัสข้อมูล' }, { key: 'message', label: 'รายละเอียด' }], r.results || '')}</div>`;
+}
+function renderBackup() { $('#pageContent').innerHTML = heading('สำรองข้อมูล', 'ส่งออกข้อมูลระบบเป็นไฟล์ JSON ลงเครื่อง โดยไม่เปิดผ่าน Google Drive') + `<section class="panel"><div class="panel-body"><div class="notice warning">ไฟล์สำรองอาจมีข้อมูลสุขภาพและข้อมูลส่วนบุคคล ควรเก็บไว้ในอุปกรณ์ที่ได้รับอนุญาตและจำกัดผู้เข้าถึง</div><div class="grid grid-2" style="margin-top:16px"><div class="detail-item"><span>ชนิดไฟล์</span><strong>JSON Database Backup</strong></div><div class="detail-item"><span>การจัดเก็บ</span><strong>ดาวน์โหลดลงเครื่องผู้ดูแลระบบ</strong></div></div><label class="check-line" style="margin:16px 0"><input id="includeSensitive" type="checkbox"> รวมเลขบัตรประชาชนและเบอร์โทรศัพท์ในไฟล์สำรอง</label><div><button class="btn btn-primary" data-action="download-backup"><i class="fa-solid fa-download"></i> ดาวน์โหลดไฟล์สำรอง</button></div></div></section>`; }
+async function downloadBackup() { const r = await api('backup.exportJson', { include_sensitive: $('#includeSensitive').checked }); download(r.content, r.mimeType || 'application/json', r.fileName || 'watkao-backup.json'); toast('ดาวน์โหลดไฟล์สำรองแล้ว'); }
+async function renderSystem() { const health = await apiPublic('system.health'); App.systemHealth = health; $('#pageContent').innerHTML = heading('สถานะและเครื่องมือระบบ', 'ตรวจสอบการเชื่อมต่อและจัดการงานบำรุงรักษา') + `<div class="grid grid-3">${stat('สถานะฐานข้อมูล', health.databaseReady ? 'พร้อมใช้งาน' : 'ยังไม่เริ่มต้น', 'fa-database', health.databaseReady ? 'teal' : 'red')}${stat('จำนวนชีต', health.sheetCount, 'fa-table')}${stat('เวอร์ชัน API', health.version, 'fa-code-branch')}</div><div class="grid grid-2" style="margin-top:17px">${panel('เครื่องมือบำรุงรักษา', `<div class="notice warning">การยกเลิกเซสชันจะบังคับให้ผู้ใช้งานทุกคนเข้าสู่ระบบใหม่</div><div class="toolbar" style="margin-top:14px"><button class="btn btn-outline" data-action="install-reminders"><i class="fa-solid fa-bell"></i> ติดตั้งการแจ้งเตือนประจำวัน</button><button class="btn btn-danger" data-action="clear-sessions"><i class="fa-solid fa-ban"></i> ยกเลิกเซสชันทั้งหมด</button></div>`)}${panel('ข้อมูลระบบ', `<div class="detail-grid"><div class="detail-item"><span>สถานะ</span><strong>${esc(health.status)}</strong></div><div class="detail-item"><span>เวลาตรวจสอบ</span><strong>${dateText(health.time)}</strong></div></div><button class="btn btn-outline" data-action="refresh-system" style="margin-top:14px"><i class="fa-solid fa-rotate"></i> ตรวจสอบอีกครั้ง</button>`)}</div>`; }
+// ===================================================================================
+// 14. PROFILE AND PASSWORD
+// ===================================================================================
+function renderProfile() {
+    const u = App.user || {};
+    $('#pageContent').innerHTML = heading('ข้อมูลบัญชีผู้ดูแลระบบ', 'ตรวจสอบข้อมูลบัญชีและเปลี่ยนรหัสผ่านสำหรับการเข้าใช้งาน') +
+        `<div class="grid grid-2">
+        <section class="panel"><div class="panel-body">
+          <div class="profile-row"><div class="profile-avatar"><i class="fa-regular fa-user"></i></div><div><strong>${esc(u.full_name || u.username || 'ผู้ดูแลระบบ')}</strong><div class="muted small">${esc(LABELS[u.role] || u.role || 'Admin')}</div></div></div>
+          <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+          <div class="detail-grid">
+            <div class="detail-item"><span>ชื่อผู้ใช้</span><strong>${esc(u.username || '-')}</strong></div>
+            <div class="detail-item"><span>เบอร์โทรศัพท์</span><strong>${esc(u.phone || '-')}</strong></div>
+            <div class="detail-item"><span>อีเมล</span><strong>${esc(u.email || '-')}</strong></div>
+            <div class="detail-item"><span>หมู่บ้านที่รับผิดชอบ</span><strong>${esc(u.assigned_moo || '-')}</strong></div>
+          </div>
+        </div></section>
+        <section class="panel"><div class="panel-header"><h3>ความปลอดภัยบัญชี</h3></div><div class="panel-body">
+          <p class="muted">ควรใช้รหัสผ่านที่ไม่ซ้ำกับระบบอื่น และไม่เปิดเผยรหัสผ่านแก่บุคคลอื่น</p>
+          <button class="btn btn-primary" data-action="change-password"><i class="fa-solid fa-key"></i> เปลี่ยนรหัสผ่าน</button>
+        </div></section>
+      </div>`;
+}
+async function changePassword() {
+    await formModal('เปลี่ยนรหัสผ่าน', [
+        { name: 'oldPassword', label: 'รหัสผ่านเดิม', type: 'password', required: true },
+        { name: 'newPassword', label: 'รหัสผ่านใหม่', type: 'password', required: true },
+        { name: 'confirmPassword', label: 'ยืนยันรหัสผ่านใหม่', type: 'password', required: true }
+    ], async (v) => {
+        if (v.newPassword.length < 10)
+            throw new Error('รหัสผ่านใหม่ต้องมีอย่างน้อย 10 ตัวอักษร');
+        if (v.newPassword !== v.confirmPassword)
+            throw new Error('รหัสผ่านใหม่และการยืนยันไม่ตรงกัน');
+        await api('auth.changePassword', { oldPassword: v.oldPassword, newPassword: v.newPassword });
+    }, { note: 'รหัสผ่านใหม่ต้องมีอย่างน้อย 10 ตัวอักษร' });
+}
+// ===================================================================================
+// 15. EVENT DELEGATION AND ACTION ROUTING
+// ===================================================================================
+async function onClick(e) {
+    const nav = e.target.closest('[data-view]');
+    if (nav) {
+        navigate(nav.dataset.view);
+        return;
+    }
+    const el = e.target.closest('[data-action]');
+    if (!el)
+        return;
+    const a = el.dataset.action, id = el.dataset.id, type = el.dataset.type;
+    try {
+        switch (a) {
+            case 'logout':
+                await logout();
+                break;
+            case 'add-user':
+                await userForm();
+                break;
+            case 'refresh-users':
+                await renderUsers();
+                break;
+            case 'edit':
+                if (App.view === 'users') {
+                    const row = App.cache.users.find(x => x.user_id === id);
+                    if (row)
+                        await userForm(row);
+                }
+                else if (App.view === 'villages') {
+                    const row = App.cache.villages.find(x => x.village_id === id);
+                    if (row)
+                        await villageForm(row);
+                }
+                else if (App.view === 'assignments') {
+                    const row = App.cache.assignments.find(x => x.assignment_id === id);
+                    if (row)
+                        await assignmentForm(row);
+                }
+                else if (App.view === 'lookups') {
+                    const row = App.cache.lookups.find(x => x.lookup_id === id);
+                    if (row)
+                        await lookupForm(row);
+                }
+                else if (App.view === 'settings') {
+                    const row = App.cache.settings.find(x => x.setting_key === id);
+                    if (row)
+                        await settingForm(row);
+                }
+                else if (MODULES[App.view]) {
+                    const c = MODULES[App.view];
+                    const row = (App.cache[App.view] || []).find(x => x[c.id] === id);
+                    if (row)
+                        await recordForm(App.view, row);
+                }
+                break;
+            case 'toggle': {
+                await api('users.toggle', { user_id: id });
+                await renderUsers();
+                break;
+            }
+            case 'reset':
+                await resetUserPassword(id);
+                break;
+            case 'add-village':
+                await villageForm();
+                break;
+            case 'add-assignment':
+                await assignmentForm();
+                break;
+            case 'archive': {
+                const ok = await Swal.fire({ icon: 'warning', title: 'ยืนยันการเก็บถาวร', text: 'รายการจะถูกเก็บถาวรและไม่แสดงในรายการปกติ', showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#b84242' });
+                if (!ok.isConfirmed)
+                    break;
+                if (App.view === 'assignments')
+                    await api('assignments.archive', { assignment_id: id });
+                else if (MODULES[App.view]?.archive)
+                    await api(MODULES[App.view].archive, { [MODULES[App.view].id]: id });
+                else
+                    throw new Error('รายการนี้ไม่รองรับการเก็บถาวร');
+                if (App.view === 'assignments')
+                    await renderAssignments();
+                else
+                    await renderEntity(App.view);
+                break;
+            }
+            case 'add-record':
+                await recordForm(type);
+                break;
+            case 'refresh-module':
+                await renderEntity(type);
+                break;
+            case 'module-xlsx':
+                await exportExcel(type === 'screenings' ? 'screenings' : type);
+                break;
+            case 'view':
+                if (App.view === 'households') {
+                    const d = await api('households.dossier', { household_id: id });
+                    await Swal.fire({ title: 'แฟ้มครัวเรือน', html: `<div style="text-align:left"><div class="detail-grid">${Object.entries(d.household).filter(([k]) => ['household_code', 'house_number', 'moo', 'household_head_name', 'member_count', 'risk_level'].includes(k)).map(([k, v]) => `<div class="detail-item"><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join('')}</div><h3>สมาชิก (${d.members.length})</h3>${table([{ key: 'first_name', label: 'ชื่อ', render: x => `${esc(x.first_name)} ${esc(x.last_name)}` }, { key: 'age', label: 'อายุ' }, { key: 'gender', label: 'เพศ' }, { key: 'care_level', label: 'การดูแล' }], d.members || '')}</div>`, width: 900 });
+                }
+                else if (App.view === 'members') {
+                    const m = await api('members.get', { member_id: id });
+                    await Swal.fire({ title: 'ข้อมูลสมาชิก', html: `<div class="detail-grid">${Object.entries(m).filter(([k]) => ['first_name', 'last_name', 'gender', 'age', 'phone', 'health_right', 'care_level', 'drug_allergy'].includes(k)).map(([k, v]) => `<div class="detail-item"><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join('')}</div>`, width: 800 });
+                }
+                break;
+            case 'load-genogram':
+                await loadGenogram($('#genoSelect').value);
+                break;
+            case 'add-relation':
+                await relationForm(id);
+                break;
+            case 'edit-relation': {
+                const relation = (App.cache.dossier?.relations || []).find(r => r.relation_id === id);
+                if (relation)
+                    await relationForm(App.cache.dossier.household.household_id, relation);
+                break;
+            }
+            case 'delete-relation': {
+                const confirm = await Swal.fire({ icon: 'warning', title: 'ยืนยันการเก็บถาวร', text: 'ความสัมพันธ์นี้จะถูกเก็บถาวรและไม่แสดงในแผนผังปกติ', showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#b84242' });
+                if (confirm.isConfirmed) {
+                    await api('relations.delete', { relation_id: id });
+                    await loadGenogram(el.dataset.householdId);
+                }
+                break;
+            }
+            case 'change-password':
+                await changePassword();
+                break;
+            case 'review':
+                await reviewSubmission(id);
+                break;
+            case 'refresh-approvals':
+                await renderApprovals();
+                break;
+            case 'add-lookup':
+                await lookupForm();
+                break;
+            case 'add-setting':
+                await settingForm();
+                break;
+            case 'mark-notification':
+                await api('notifications.markRead', { notification_id: id });
+                await renderNotifications();
+                break;
+            case 'export-xlsx':
+                await exportExcel(type);
+                break;
+            case 'export-csv': {
+                const r = await api('reports.exportData', { report_type: type });
+                downloadCsv(r.rows || [], r.headers || [], `รายงาน_${type}.csv`);
+                break;
+            }
+            case 'run-import':
+                await executeImport();
+                break;
+            case 'download-backup':
+                await downloadBackup();
+                break;
+            case 'refresh-system':
+                await renderSystem();
+                break;
+            case 'install-reminders': {
+                const c = await Swal.fire({ icon: 'question', title: 'ติดตั้งระบบแจ้งเตือน', text: 'ระบบจะสร้าง Trigger สำหรับตรวจสอบนัดหมายและการติดตามทุกวัน', showCancelButton: true, confirmButtonText: 'ติดตั้ง', cancelButtonText: 'ยกเลิก' });
+                if (c.isConfirmed) {
+                    const r = await api('system.installReminders', {});
+                    toast(r.message || 'ติดตั้งเรียบร้อยแล้ว');
+                }
+                break;
+            }
+            case 'clear-sessions': {
+                const c = await Swal.fire({ icon: 'warning', title: 'ยกเลิกเซสชันทั้งหมด', text: 'ผู้ใช้งานทุกคนจะต้องเข้าสู่ระบบใหม่ รวมถึงบัญชีปัจจุบัน', showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'ยกเลิก', confirmButtonColor: '#b84242' });
+                if (c.isConfirmed) {
+                    await api('system.clearSessions', {});
+                    clearToken();
+                    showLogin();
+                }
+                break;
+            }
+            default: break;
+        }
+    }
+    catch (err) {
+        showError(err);
+    }
+}
+// ===================================================================================
+// 16. STARTUP
+// ===================================================================================
+document.addEventListener('DOMContentLoaded', init);
+
+</script>
+</body>
+</html>
