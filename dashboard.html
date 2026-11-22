@@ -804,7 +804,7 @@ tr:hover td {
 <body>
   <div id="loginScreen" class="login-screen">
     <section class="login-brand"><div><div class="brand-mark"><i class="fa-solid fa-sliders"></i></div><h1>ระบบบริหารจัดการ<br>ฐานข้อมูลสุขภาพชุมชน</h1><p>สำหรับผู้ดูแลระบบ<br>โรงพยาบาลส่งเสริมสุขภาพตำบลวัดเกาะ อ.ศรีสำโรง จ.สุโขทัย</p></div><div class="small" style="color:rgba(255,255,255,.63)">สงวนสิทธิ์เฉพาะผู้ดูแลระบบที่ได้รับอนุญาต</div></section>
-    <section class="login-panel"><div class="login-card"><h2>เข้าสู่ระบบหลังบ้าน</h2><p class="sub">กรุณาใช้บัญชีผู้ดูแลระบบเพื่อเข้าสู่หน้าจัดการ</p><form id="loginForm"><div class="form-field"><label for="username">ชื่อผู้ใช้</label><div class="input-icon"><i class="fa-regular fa-user"></i><input id="username" class="form-control" autocomplete="username" required></div></div><div class="form-field"><label for="password">รหัสผ่าน</label><div class="input-icon"><i class="fa-solid fa-lock"></i><input id="password" class="form-control" type="password" autocomplete="current-password" required style="padding-right:48px"><button class="password-toggle" type="button" id="togglePassword"><i class="fa-regular fa-eye"></i></button></div></div><div class="login-options"><label class="check-line"><input id="rememberMe" type="checkbox"> จดจำการเข้าสู่ระบบ</label><span><i class="fa-solid fa-shield-halved"></i> Admin</span></div><button class="btn btn-primary btn-block" id="loginButton"><i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ</button></form><div class="login-note">หากไม่สามารถเข้าสู่ระบบได้ กรุณาติดต่อผู้ดูแลระบบหลัก</div></div></section>
+    <section class="login-panel"><div class="login-card"><h2>เข้าสู่ระบบหลังบ้าน</h2><p class="sub">กรุณาใช้บัญชีผู้ดูแลระบบเพื่อเข้าสู่หน้าจัดการ</p><form id="loginForm"><div class="form-field"><label for="username">ชื่อผู้ใช้</label><div class="input-icon"><i class="fa-regular fa-user"></i><input id="username" class="form-control" autocomplete="username" required></div></div><div class="form-field"><label for="password">รหัสผ่าน</label><div class="input-icon"><i class="fa-solid fa-lock"></i><input id="password" class="form-control" type="password" autocomplete="current-password" required style="padding-right:48px"><button class="password-toggle" type="button" id="togglePassword"><i class="fa-regular fa-eye"></i></button></div></div><div class="login-options"><label class="check-line"><input id="rememberMe" type="checkbox"> จดจำการเข้าสู่ระบบ</label><span><i class="fa-solid fa-shield-halved"></i> Admin</span></div><button type="button" class="btn btn-primary btn-block" id="loginButton"><i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ</button></form><div class="login-note">หากไม่สามารถเข้าสู่ระบบได้ กรุณาติดต่อผู้ดูแลระบบหลัก</div></div></section>
   </div>
 
   <div id="appShell" class="app-shell hidden">
@@ -825,7 +825,7 @@ tr:hover td {
 // ===================================================================================
 const API_URL = 'https://patient-breeze-12ed.sisosoawooaoo.workers.dev/api';
 const App = { token: '', user: null, view: 'overview', charts: [], cache: {}, systemHealth: null };
-const $ = (s, r = document) => r.querySelector(s);
+const $ = (s, r = document) => r.querySelector(s);let loginInProgress = false;
 const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
 const NAV = [
     { section: 'ภาพรวมและทะเบียน' },
@@ -1255,7 +1255,23 @@ function writeToken(token, remember) { localStorage.removeItem('watk_session'); 
 function clearToken() { localStorage.removeItem('watk_session'); sessionStorage.removeItem('watk_session'); App.token = ''; App.user = null; }
 async function init() {
     $('#togglePassword').addEventListener('click', () => { const x = $('#password'); const show = x.type === 'password'; x.type = show ? 'text' : 'password'; $('#togglePassword').innerHTML = `<i class="fa-regular ${show ? 'fa-eye-slash' : 'fa-eye'}"></i>`; });
-    $('#loginForm').addEventListener('submit', login);
+    const loginForm = $('#loginForm');
+const loginButton = $('#loginButton');
+
+// รองรับการกด Enter ในฟอร์ม
+loginForm.addEventListener('submit', function(event) {
+    event.preventDefault();
+    login();
+});
+
+// รองรับการแตะปุ่มเข้าสู่ระบบโดยตรง
+loginButton.addEventListener('click', function(event) {
+    event.preventDefault();
+
+    if (loginForm.reportValidity()) {
+        login();
+    }
+});
     $('#mobileMenu').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
     $('#mobileOverlay').addEventListener('click', closeNav);
     document.addEventListener('click', onClick);
@@ -1282,7 +1298,18 @@ async function init() {
 }
 function showLogin() { $('#loginScreen').classList.remove('hidden'); $('#appShell').classList.add('hidden'); }
 async function login(e) {
-    e.preventDefault();
+
+    if (e && typeof e.preventDefault === 'function') {
+        e.preventDefault();
+    }
+
+    if (loginInProgress) return;
+
+    const form = $('#loginForm');
+
+    if (!form.reportValidity()) return;
+
+    loginInProgress = true;
     const b = $('#loginButton');
     b.disabled = true;
     b.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> กำลังตรวจสอบ';
