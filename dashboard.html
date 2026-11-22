@@ -1524,26 +1524,132 @@ async function renderEntity(type, query = '') {
     });
 }
 async function recordForm(type, row = null) {
+
+async function recordForm(type, row = null) {
     const c = MODULES[type];
-    const fields = c.fields.map(([name, label, kind, required, defaultValue]) => ({ name, label, type: kind || 'text', required: !!required, full: kind === 'map-picker', value: kind === 'map-picker' ? { latitude: row?.latitude || '', longitude: row?.longitude || '' } : (row?.[name] ?? defaultValue ?? '') }));
-    await formModal(row ? 'แก้ไข' + c.title : 'เพิ่ม' + c.title, fields, async (v) => {
-        const imageField = type === 'households' ? 'house_photo' : type === 'members' ? 'member_photo' : type === 'visits' ? 'visit_photo' : '';
-        const imageFile = imageField ? v[imageField] : null;
-        if (imageField)
-            delete v[imageField];
-        if (imageFile) {
-            const url = await uploadImage(imageFile);
-            if (type === 'households')
-                v.house_photo_url = url;
-            else if (type === 'members')
-                v.photo_url = url;
-            else
-                v.photo_urls_json = JSON.stringify([url]);
+
+    // โหลดทะเบียนครัวเรือนจริงสำหรับฟอร์มสมาชิก
+    let householdOptions = [];
+
+    if (type === 'members') {
+        const householdResult = await api('households.list', {
+            page: 1,
+            pageSize: 200
+        });
+
+        householdOptions = (householdResult.items || [])
+            .filter(h => h && h.household_id)
+            .map(h => ({
+                value: String(h.household_id),
+                label:
+                    `บ้านเลขที่ ${h.house_number || '-'} ` +
+                    `· หมู่ ${h.moo || '-'}` +
+                    (h.household_head_name
+                        ? ` · ${h.household_head_name}`
+                        : '')
+            }));
+
+        // รองรับการแก้ไขสมาชิกที่มีรหัสครัวเรือนเดิม
+        if (
+            row?.household_id &&
+            !householdOptions.some(
+                h => h.value === String(row.household_id)
+            )
+        ) {
+            householdOptions.push({
+                value: String(row.household_id),
+                label: `รหัสครัวเรือนเดิม: ${row.household_id}`
+            });
         }
-        await api(row ? c.update : c.create, { ...(row ? { [c.id]: row[c.id] } : {}), ...v });
-        await renderEntity(type);
-    }, { width: 900, note: 'กรุณาตรวจสอบรหัสครัวเรือนและรหัสสมาชิกก่อนบันทึก' });
+
+        // ป้องกันการเพิ่มสมาชิกโดยไม่มีครัวเรือน
+        if (householdOptions.length === 0) {
+            await Swal.fire({
+                icon: 'warning',
+                title: 'ยังไม่มีทะเบียนครัวเรือน',
+                text: 'กรุณาเพิ่มข้อมูลในเมนูจัดการครัวเรือนก่อนเพิ่มสมาชิก'
+            });
+            return;
+        }
+    }
+
+    // สร้างฟอร์มตามโครงสร้างเดิม
+    const fields = c.fields.map(
+        ([name, label, kind, required, defaultValue]) => {
+
+            const field = {
+                name,
+                label,
+                type: kind || 'text',
+                required: !!required,
+                full: kind === 'map-picker',
+                value: kind === 'map-picker'
+                    ? {
+                        latitude: row?.latitude || '',
+                        longitude: row?.longitude || ''
+                    }
+                    : (row?.[name] ?? defaultValue ?? '')
+            };
+
+            // เปลี่ยน household_id เป็นรายการเลือก
+            if (type === 'members' && name === 'household_id') {
+                field.label = 'เลือกครัวเรือน';
+                field.type = 'select';
+                field.options = householdOptions;
+                field.help =
+                    'เลือกบ้านเลขที่และหมู่บ้านที่ต้องการผูกกับสมาชิก';
+            }
+
+            return field;
+        }
+    );
+
+    await formModal(
+        row ? 'แก้ไข' + c.title : 'เพิ่ม' + c.title,
+        fields,
+        async (v) => {
+
+            const imageField =
+                type === 'households' ? 'house_photo' :
+                type === 'members' ? 'member_photo' :
+                type === 'visits' ? 'visit_photo' : '';
+
+            const imageFile = imageField ? v[imageField] : null;
+
+            if (imageField) {
+                delete v[imageField];
+            }
+
+            if (imageFile) {
+                const url = await uploadImage(imageFile);
+
+                if (type === 'households') {
+                    v.house_photo_url = url;
+                } else if (type === 'members') {
+                    v.photo_url = url;
+                } else {
+                    v.photo_urls_json = JSON.stringify([url]);
+                }
+            }
+
+            // ส่ง household_id จริงจากรายการที่เลือก
+            await api(
+                row ? c.update : c.create,
+                {
+                    ...(row ? { [c.id]: row[c.id] } : {}),
+                    ...v
+                }
+            );
+
+            await renderEntity(type);
+        },
+        {
+            width: 900,
+            note: 'กรุณาตรวจสอบครัวเรือนและข้อมูลสมาชิกก่อนบันทึก'
+        }
+    );
 }
+
 async function renderGenogram() { const r = await api('households.list', { page: 1, pageSize: 200 }); const opts = r.items || []; $('#pageContent').innerHTML = heading('เครือญาติและความสัมพันธ์', 'จัดการความสัมพันธ์สมาชิกและตรวจสอบแฟ้มเครือญาติ') + `<section class="panel"><div class="panel-body"><div class="toolbar"><select id="genoSelect" class="form-control" style="max-width:450px"><option value="">เลือกครัวเรือน</option>${opts.map(h => `<option value="${esc(h.household_id)}">บ้าน ${esc(h.house_number)} หมู่ ${esc(h.moo)} — ${esc(h.household_head_name || '')}</option>`).join('')}</select><button class="btn btn-primary" data-action="load-genogram"><i class="fa-solid fa-diagram-project"></i> แสดง</button></div><div id="genoResult" style="margin-top:15px">${empty('เลือกครัวเรือน')}</div></div></section>`; }
 async function loadGenogram(id) {
     if (!id)
