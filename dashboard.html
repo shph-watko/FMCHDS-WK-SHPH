@@ -1332,8 +1332,10 @@ async function login(e) {
         showError(err);
     }
     finally {
-        b.disabled = false;
-        b.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ';
+    loginInProgress = false;
+
+    b.disabled = false;
+    b.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ';
     }
 }
 async function enterApp() {
